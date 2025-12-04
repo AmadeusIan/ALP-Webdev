@@ -9,11 +9,14 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
+    public function up()
     {
-        Schema::create('meeting_request', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
+    Schema::create('meeting_requests', function (Blueprint $table) {
+        $table->id();
+        $table->foreignId('user_id')->constrained('users')->onDelete('cascade'); // Customer yg request
+        $table->foreignId('schedule_id')->constrained('schedules')->onDelete('cascade');
+        $table->string('status', 50)->default('pending');
+        $table->timestamp('created_at')->useCurrent();
         });
     }
 

@@ -9,23 +9,24 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(){
-    Schema::create('schedules', function (Blueprint $table) {
+    public function up()
+    {
+        Schema::create('review_items', function (Blueprint $table) {
         $table->id();
-        $table->foreignId('user_id')->constrained('users')->onDelete('cascade'); 
-        $table->date('date');
-        $table->time('start_time');
-        $table->time('end_time');
-        $table->text('purpose')->nullable();
+        $table->foreignId('order_item_id')->constrained('order_items')->onDelete('cascade');
+        
+        $table->string('title', 50)->nullable();
+        $table->integer('rating');
+        $table->text('comment')->nullable();
         $table->timestamp('created_at')->useCurrent();
     });
-}
+    }
 
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
-        Schema::dropIfExists('schedules');
+        Schema::dropIfExists('review');
     }
 };
