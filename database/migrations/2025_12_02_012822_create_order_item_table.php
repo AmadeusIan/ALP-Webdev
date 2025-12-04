@@ -9,11 +9,14 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
+    public function up()
     {
-        Schema::create('order_item', function (Blueprint $table) {
+        Schema::create('order_items', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
+            $table->foreignId('order_id')->constrained('orders')->onDelete('cascade');
+            $table->foreignId('fabric_id')->constrained('fabrics'); // Jangan cascade delete kain agar riwayat aman
+            $table->decimal('quantity_meter', 10, 2);
+            $table->decimal('total_price', 10, 2);
         });
     }
 

@@ -9,11 +9,16 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
+    public function up()
     {
-        Schema::create('notification', function (Blueprint $table) {
+        Schema::create('notifications', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->string('title');
+            $table->text('message')->nullable();
+            $table->string('type', 50)->nullable();
+            $table->boolean('is_read')->default(false);
+            $table->timestamp('created_at')->useCurrent();
         });
     }
 

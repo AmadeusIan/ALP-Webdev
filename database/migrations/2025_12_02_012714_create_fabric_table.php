@@ -9,13 +9,22 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
-    {
-        Schema::create('fabric', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
-        });
-    }
+public function up()
+{
+    Schema::create('fabrics', function (Blueprint $table) {
+        $table->id();
+        // Relasi FK
+        $table->foreignId('category_id')->nullable()->constrained('categories')->onDelete('set null');
+        $table->foreignId('supplier_id')->nullable()->constrained('suppliers')->onDelete('set null');
+        
+        $table->string('name');
+        $table->string('color', 100)->nullable();
+        $table->string('material')->nullable();
+        $table->decimal('price_per_meter', 10, 2);
+        $table->decimal('stock_meter', 10, 2)->default(0);
+        $table->timestamps();
+    });
+}
 
     /**
      * Reverse the migrations.

@@ -9,13 +9,17 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
-    {
-        Schema::create('inventory_log', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
-        });
-    }
+public function up()
+{
+    Schema::create('inventory_logs', function (Blueprint $table) {
+        $table->id();
+        $table->foreignId('fabric_id')->constrained('fabrics')->onDelete('cascade');
+        $table->string('change_type', 50); // restock, sale, adjustment
+        $table->decimal('change_amount', 10, 2);
+        $table->text('note')->nullable();
+        $table->timestamp('created_at')->useCurrent();
+    });
+}
 
     /**
      * Reverse the migrations.

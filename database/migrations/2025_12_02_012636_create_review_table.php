@@ -9,11 +9,15 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
+    public function up()
     {
-        Schema::create('review', function (Blueprint $table) {
+        Schema::create('reviews', function (Blueprint $table) { // Nama tabel disesuaikan plural
             $table->id();
-            $table->timestamps();
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->string('title', 50)->nullable();
+            $table->integer('rating');
+            $table->text('comment')->nullable();
+            $table->timestamp('created_at')->useCurrent();
         });
     }
 
