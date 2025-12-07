@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\InventoryLogController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\FabricController;
 use Illuminate\Support\Facades\Route;
 
@@ -37,6 +38,14 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::get('/inventory-logs', [InventoryLogController::class, 'index'])->name('inventory_logs.index');
+
+    Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+    Route::get('/fabrics/{fabric}/book', [OrderController::class, 'create'])->name('orders.create');
+    Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
+
+    Route::patch('/orders/{order}/approve', [OrderController::class, 'approve'])->name('orders.approve');
+    Route::patch('/orders/{order}/reject', [OrderController::class, 'reject'])->name('orders.reject');
+    
 });
 
 Route::get('/fabrics/{fabric}', [FabricController::class, 'show'])->name('fabrics.show');

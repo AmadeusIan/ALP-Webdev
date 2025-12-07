@@ -21,6 +21,14 @@ class DatabaseSeeder extends Seeder
             'role' => 'admin', // Pastikan kolom role ada
         ]);
 
+        $user = User::create([
+            'name' => 'User',
+            'email' => 'user@gmail.com', // Email untuk login
+            'password' => bcrypt('password123'),
+            'role' => 'user', // Pastikan kolom role ada
+        ]);
+
+
         // 2. Buat Data Kategori
         $catCotton = Category::create(['name' => 'Cotton']);
         $catSilk = Category::create(['name' => 'Silk']);
