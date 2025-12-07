@@ -56,6 +56,7 @@ class DatabaseSeeder extends Seeder
         // 5. Catat Log Inventory (Supaya data stok sinkron)
         InventoryLog::create([
             'fabric_id' => $fabric1->id,
+            'user_id' => $user->id,
             'change_type' => 'initial',
             'change_amount' => 100,
             'note' => 'Seeding data awal'
@@ -63,6 +64,7 @@ class DatabaseSeeder extends Seeder
 
         InventoryLog::create([
             'fabric_id' => $fabric2->id,
+            'user_id' => $user->id,
             'change_type' => 'initial',
             'change_amount' => 50,
             'note' => 'Seeding data awal'

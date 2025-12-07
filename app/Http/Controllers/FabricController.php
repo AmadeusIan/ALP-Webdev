@@ -1,16 +1,16 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+
 
 use App\Models\Fabric;
 use App\Models\Supplier;
 use App\Models\Category;
 use App\Models\InventoryLog;
 use Illuminate\Http\Request;
-
 
 class FabricController extends Controller
 {
@@ -108,7 +108,7 @@ class FabricController extends Controller
 
         $fabric->update($validated);
 
-        return redirect()->route('fabrics.show')->with('success', 'Fabric updated successfully!');
+        return redirect()->route('fabrics.show', $fabric)->with('success', 'Fabric updated successfully!');
     }
 
     public function updateStock(Request $request, $id)
@@ -125,7 +125,11 @@ class FabricController extends Controller
         DB::transaction(function () use ($fabric, $request) {
             $input = $request->change_amount;
             $type = $request->change_type;
+
+            $currentStock = $fabric->stock_meter;
+
             $logAmount = 0;
+            $newstock = 0;
 
             if ($type === 'adjustment') {
                 $logAmount = $input - $fabric->stock_meter;
@@ -134,17 +138,27 @@ class FabricController extends Controller
             } else {
                 if ($type === 'restock') {
                     $logAmount = abs($input);
+
                 } else {
                     $logAmount = -1 * abs($input);
                 }
-                $fabric->stock_meter += $logAmount;
+            } 
+
+            $newstock = $currentStock + $logAmount;
+
+            if ($newstock < 0){ 
+                throw ValidationException::withMessages([
+                    'change_amount' => 'Stok tidak mencukupi! Stok saat ini:' . $currentStock]);
             }
+
+            $fabric->stock_meter = $newstock;
             $fabric->save();
 
             InventoryLog::create([
                 'fabric_id' => $fabric->id,
+                'user_id' => Auth::id() ?? 1,
                 'change_type' => $request->change_type,
-                'change_amount' => $request->change_amount,
+                'change_amount' => $logAmount,
                 'note' => $request->note
             ]);
         });

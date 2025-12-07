@@ -9,40 +9,75 @@
         <div class="max-w-2xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
 
+
+                @if ($errors->any())
+                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
+                        <strong class="font-bold">Error</strong>
+                        <ul class="mt-2 list-disc list-inside text-sm">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
                 <form method="POST" action="{{ route('fabrics.update', $fabric) }}">
                     @csrf
                     @method('PUT')
 
                     <div class="mb-4">
                         <label class="block text-gray-700 text-sm font-bold mb-2">Fabric Name</label>
-                        <input type="text" name="name" value="{{ $fabric->name }}" class="w-full border rounded px-3 py-2" required>
+                        <input type="text" name="name" value="{{ $fabric->name }}"
+                            class="w-full border rounded px-3 py-2" required>
                     </div>
 
                     <div class="mb-4">
                         <label class="block text-gray-700 text-sm font-bold mb-2">Category</label>
                         <select name="category_id" class="w-full border rounded px-3 py-2">
-                            @foreach($categories as $cat)
-                                <option value="{{ $cat->id }}" {{ $fabric->category_id == $cat->id ? 'selected' : '' }}>
+                            @foreach ($categories as $cat)
+                                <option value="{{ $cat->id }}"
+                                    {{ $fabric->category_id == $cat->id ? 'selected' : '' }}>
                                     {{ $cat->name }}
                                 </option>
                             @endforeach
                         </select>
                     </div>
 
+                    <div class="mb-4">
+                        <label class="block font-medium text-sm text-gray-700">Supplier</label>
+                        <select name="supplier_id" class="border-gray-300 rounded-md shadow-sm w-full mt-1">
+                            <option value="">-- Select Supplier --</option>
+                            @foreach ($suppliers as $sup)
+                                <option value="{{ $sup->id }}"
+                                    {{ $fabric->supplier_id == $sup->id ? 'selected' : '' }}>
+
+                                    {{ $sup->name }}
+                                </option>
+                            @endforeach
+                        </select>
+
+                        @error('supplier_id')
+                            <p class="text-red-500 text-xs italic mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
                     <div class="grid grid-cols-2 gap-4">
                         <div class="mb-4">
                             <label class="block text-gray-700 text-sm font-bold mb-2">Color</label>
-                            <input type="text" name="color" value="{{ $fabric->color }}" class="w-full border rounded px-3 py-2">
+                            <input type="text" name="color" value="{{ $fabric->color }}"
+                                class="w-full border rounded px-3 py-2">
                         </div>
                         <div class="mb-4">
                             <label class="block text-gray-700 text-sm font-bold mb-2">Material</label>
-                            <input type="text" name="material" value="{{ $fabric->material }}" class="w-full border rounded px-3 py-2">
+                            <input type="text" name="material" value="{{ $fabric->material }}"
+                                class="w-full border rounded px-3 py-2">
                         </div>
                     </div>
 
                     <div class="mb-4">
                         <label class="block text-gray-700 text-sm font-bold mb-2">Price per Meter</label>
-                        <input type="number" name="price_per_meter" value="{{ $fabric->price_per_meter }}" class="w-full border rounded px-3 py-2" required>
+                        <input type="number" name="price_per_meter" value="{{ $fabric->price_per_meter }}"
+                            class="w-full border rounded px-3 py-2" required>
                     </div>
 
                     <div class="mb-4">
