@@ -14,9 +14,13 @@ return new class extends Migration
         Schema::create('order_items', function (Blueprint $table) {
             $table->id();
             $table->foreignId('order_id')->constrained('orders')->onDelete('cascade');
-            $table->foreignId('fabric_id')->constrained('fabrics'); // Jangan cascade delete kain agar riwayat aman
-            $table->decimal('quantity_meter', 10, 2);
-            $table->decimal('total_price', 10, 2);
+            $table->foreignId('fabric_id')->constrained('fabrics')->onDelete('cascade'); 
+            
+            $table->integer('quantity');
+            $table->decimal('price_per_meter', 10, 2);
+            $table->decimal('subtotal', 10, 2);
+
+            $table->timestamps();
         });
     }
 

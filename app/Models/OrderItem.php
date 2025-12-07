@@ -6,8 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 class OrderItem extends Model
 {
     use HasFactory;
-    protected $guarded = ['id'];
-    public $timestamps = false;
+    protected $guarded = [];
+    public $timestamps = true;
 
     public function order() {
         return $this->belongsTo(Order::class);
