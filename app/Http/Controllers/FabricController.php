@@ -14,10 +14,9 @@ use Illuminate\Http\Request;
 
 class FabricController extends Controller
 {
-    // GET /api/fabrics (Lihat Semua Kain)
+    
     public function index(Request $request)
     {
-        // Mengambil data kain beserta nama Kategori & Supplier-nya
         $query = Fabric::with(['category', 'supplier']);
 
         if ($request->has('search') && $request->search != '') {
@@ -43,7 +42,7 @@ class FabricController extends Controller
         return view('fabrics.create', compact('categories', 'suppliers'));
     }
 
-    // POST /api/fabrics (Tambah Kain Baru)
+    
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -57,12 +56,11 @@ class FabricController extends Controller
             'description' => 'nullable|string'
         ]);
 
-        // Gunakan Transaksi Database agar data konsisten
         $fabric = DB::transaction(function () use ($validated) {
-            // 1. Buat Kain
+            
             $newFabric = Fabric::create($validated);
 
-            // 2. Catat Log Stok Awal
+            
             InventoryLog::create([
                 'fabric_id' => $newFabric->id,
                 'user_id' => Auth::id(),
@@ -143,7 +141,6 @@ class FabricController extends Controller
             }
             $fabric->save();
 
-            // 2. Catat siapa yang mengubah dan kenapa
             InventoryLog::create([
                 'fabric_id' => $fabric->id,
                 'change_type' => $request->change_type,

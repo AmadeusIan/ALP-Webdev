@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\InventoryLogController;
 use App\Http\Controllers\FabricController;
 use Illuminate\Support\Facades\Route;
 
@@ -35,6 +36,7 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
+    Route::get('/inventory-logs', [InventoryLogController::class, 'index'])->name('inventory_logs.index');
 });
 
 Route::get('/fabrics/{fabric}', [FabricController::class, 'show'])->name('fabrics.show');
