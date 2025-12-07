@@ -17,7 +17,7 @@ public function up()
         $table->string('change_type', 50); // restock, sale, adjustment
         $table->decimal('change_amount', 10, 2);
         $table->text('note')->nullable();
-        $table->timestamp('created_at')->useCurrent();
+        $table->timestamps();
     });
 }
 

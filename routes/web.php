@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\FabricController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -11,12 +12,31 @@ Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::middleware('auth')->group(function () {
+
+Route::get('/fabrics', [FabricController::class, 'index'])->name('fabrics.index');
+
+// Halaman Admin
+Route::middleware(['auth'])->group(function () {
+    Route::get('/fabrics/create', [FabricController::class, 'create'])->name('fabrics.create');
+    Route::post('/fabrics', [FabricController::class, 'store'])->name('fabrics.store');
+    
+    Route::get('/fabrics/{fabric}/edit', [FabricController::class, 'edit'])->name('fabrics.edit');
+    Route::put('/fabrics/{fabric}', [FabricController::class, 'update'])->name('fabrics.update');
+    
+    // Delete
+    Route::delete('/fabrics/{fabric}', [FabricController::class, 'destroy'])->name('fabrics.destroy');
+        
+    // Fitur Restock
+    Route::get('/fabrics/{fabric}/restock', [FabricController::class, 'editStock'])->name('fabrics.restock');
+    Route::post('/fabrics/{fabric}/stock', [FabricController::class, 'updateStock'])->name('fabrics.updateStock');
+
+
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
 });
 
-
+Route::get('/fabrics/{fabric}', [FabricController::class, 'show'])->name('fabrics.show');
 
 require __DIR__.'/auth.php';

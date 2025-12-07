@@ -2,19 +2,45 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+
 use App\Models\Fabric;
+use App\Models\Supplier;
+use App\Models\Category;
 use App\Models\InventoryLog;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+
 
 class FabricController extends Controller
 {
     // GET /api/fabrics (Lihat Semua Kain)
-    public function index()
+    public function index(Request $request)
     {
         // Mengambil data kain beserta nama Kategori & Supplier-nya
-        $fabrics = Fabric::with(['category', 'supplier'])->get();
-        return response()->json(['data' => $fabrics]);
+        $query = Fabric::with(['category', 'supplier']);
+
+        if ($request->has('search') && $request->search != '') {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
+
+
+        if ($request->has('category_id') && $request->category_id != '') {
+            $query->where('category_id', $request->category_id);
+        }
+
+        $fabrics = $query->latest()->get();
+        $categories = Category::all();
+
+        return view('fabrics.index', compact('fabrics', 'categories'));
+    }
+
+    public function create()
+    {
+        $categories = Category::all();
+        $suppliers = Supplier::all();
+
+        return view('fabrics.create', compact('categories', 'suppliers'));
     }
 
     // POST /api/fabrics (Tambah Kain Baru)
@@ -27,7 +53,8 @@ class FabricController extends Controller
             'color' => 'nullable|string',
             'material' => 'nullable|string',
             'price_per_meter' => 'required|numeric',
-            'stock_meter' => 'required|numeric|min:0', // Stok awal
+            'stock_meter' => 'required|numeric|min:0',
+            'description' => 'nullable|string'
         ]);
 
         // Gunakan Transaksi Database agar data konsisten
@@ -38,6 +65,7 @@ class FabricController extends Controller
             // 2. Catat Log Stok Awal
             InventoryLog::create([
                 'fabric_id' => $newFabric->id,
+                'user_id' => Auth::id(),
                 'change_type' => 'initial',
                 'change_amount' => $validated['stock_meter'],
                 'note' => 'Stok awal barang baru'
@@ -46,11 +74,47 @@ class FabricController extends Controller
             return $newFabric;
         });
 
-        return response()->json(['message' => 'Kain berhasil ditambahkan', 'data' => $fabric], 201);
+        return redirect()->route('fabrics.index')->with('success', 'Fabric added successfully!');
     }
 
-    // POST /api/fabrics/{id}/stock (Update Stok: Restock atau Koreksi)
+    public function show(Fabric $fabric)
+    {
+        $fabric->load(['category', 'supplier']);
+        return view('fabrics.show', compact('fabric'));
+    }
+
+    public function edit(Fabric $fabric)
+    {
+        $categories = Category::all();
+        $suppliers = Supplier::all();
+        return view('fabrics.edit', compact('fabric', 'categories', 'suppliers'));
+    }
+
+    public function editStock(Fabric $fabric)
+    {
+        return view('fabrics.restock', compact('fabric'));
+    }
+
+
+    public function update(Request $request, Fabric $fabric)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string',
+            'category_id' => 'required|exists:categories,id',
+            'supplier_id' => 'required|exists:suppliers,id',
+            'color' => 'nullable|string',
+            'material' => 'nullable|string',
+            'price_per_meter' => 'required|numeric',
+            'description' => 'nullable|string'
+        ]);
+
+        $fabric->update($validated);
+
+        return redirect()->route('fabrics.show')->with('success', 'Fabric updated successfully!');
+    }
+
     public function updateStock(Request $request, $id)
+
     {
         $request->validate([
             'change_type' => 'required|in:restock,adjustment,damage', // Jenis perubahan
@@ -61,9 +125,22 @@ class FabricController extends Controller
         $fabric = Fabric::findOrFail($id);
 
         DB::transaction(function () use ($fabric, $request) {
-            // 1. Update jumlah stok di tabel fabrics
-            // Jika restock: nambah. Jika damage: berkurang.
-            $fabric->stock_meter += $request->change_amount;
+            $input = $request->change_amount;
+            $type = $request->change_type;
+            $logAmount = 0;
+
+            if ($type === 'adjustment') {
+                $logAmount = $input - $fabric->stock_meter;
+
+                $fabric->stock_meter = $input;
+            } else {
+                if ($type === 'restock') {
+                    $logAmount = abs($input);
+                } else {
+                    $logAmount = -1 * abs($input);
+                }
+                $fabric->stock_meter += $logAmount;
+            }
             $fabric->save();
 
             // 2. Catat siapa yang mengubah dan kenapa
@@ -74,10 +151,12 @@ class FabricController extends Controller
                 'note' => $request->note
             ]);
         });
+        return redirect()->route('fabrics.show', $fabric)->with('success', 'Stock updated successfully!');
+    }
 
-        return response()->json([
-            'message' => 'Stok berhasil diperbarui', 
-            'current_stock' => $fabric->stock_meter
-        ]);
+    public function destroy(Fabric $fabric)
+    {
+        $fabric->delete();
+        return redirect()->route('fabrics.index')->with('success', 'Fabric deleted successfully!');
     }
 }
