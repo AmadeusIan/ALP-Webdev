@@ -18,7 +18,7 @@
                                 <tr class="bg-gray-100 text-gray-600 uppercase text-xs leading-normal">
                                     <th class="py-3 px-6 text-left">Date & Time</th>
                                     <th class="py-3 px-6 text-left">Fabric Name</th>
-                                    <th class="py-3 px-6 text-left">Admin / User</th>
+                                    <th class="py-3 px-6 text-left">Admin </th>
                                     <th class="py-3 px-6 text-center">Type</th>
                                     <th class="py-3 px-6 text-center">Amount</th>
                                     <th class="py-3 px-6 text-left">Note</th>
