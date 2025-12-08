@@ -49,7 +49,7 @@
                             <p class="text-gray-600">{{ $fabric->description ?? 'No description available.' }}</p>
                         </div>
 
-                        @if (Auth::user()->role === 'admin')
+                        @if (Auth::user()?->role === 'admin')
                             <div class="flex gap-3 border-t pt-4">
                                 <a href="{{ route('fabrics.edit', $fabric) }}"
                                     class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">Edit Info</a>
@@ -66,13 +66,26 @@
                             </div>
                         @endif
 
-                        @if (Auth::user()->role !== 'admin')
-                            <div class="mt-6">
-                                <a href="{{ route('orders.create', $fabric) }}"
-                                    class="block w-full bg-indigo-600 text-white text-center py-3 rounded-lg font-bold hover:bg-indigo-700 shadow-lg">
-                                    Rent This Fabric
-                                </a>
-                            </div>
+                        @if (Auth::user()?->role !== 'admin')
+                            <form action="{{ route('cart.add', $fabric->id) }}" method="POST"
+                                class="mt-6 border p-4 rounded-lg bg-gray-50">
+                                @csrf
+
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Mau Sewa Berapa Meter?</label>
+
+                                <div class="flex gap-2">
+                                    <input type="number" name="quantity" value="1" min="1"
+                                        max="{{ $fabric->stock_meter }}"
+                                        class="w-full border rounded px-3 py-2 text-center" required>
+
+                                    <button type="submit"
+                                        class="bg-orange-500 text-white px-6 py-2 rounded-lg font-bold hover:bg-orange-600 shadow-lg whitespace-nowrap">
+                                        + Add to Cart
+                                    </button>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">Stok tersedia: {{ $fabric->stock_meter }} meter
+                                </p>
+                            </form>
                         @endif
 
                     </div>

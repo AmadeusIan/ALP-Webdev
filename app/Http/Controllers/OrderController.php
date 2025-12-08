@@ -14,7 +14,7 @@ class OrderController extends Controller
 {
     public function create(Fabric $fabric)
     {
-        return view('order.create', compact('fabric'));
+        return view('orders.create', compact('fabric'));
     }
 
     public function store(Request $request)
@@ -82,7 +82,7 @@ class OrderController extends Controller
             $orders = Order::with(['items.fabric'])->where('user_id', $user->id)->latest()->paginate(10);
         }
 
-        return view('order.index', compact('orders'));
+        return view('orders.index', compact('orders'));
     }
 
 
@@ -100,5 +100,60 @@ class OrderController extends Controller
         $order->update(['status' => 'rejected']);
         
         return redirect()->back()->with('success', 'Order #' . $order->order_number . ' has been rejected.');
+    }
+
+        public function storeCart(Request $request)
+    {
+
+        $cart = session()->get('cart', []);
+
+        if (!$cart) {
+            return redirect()->back()->with('error', 'Cart is empty!');
+        }
+
+        $request->validate([
+            'start_date' => 'required|date|after_or_equal:today',
+            'end_date' => 'required|date|after_or_equal:start_date',
+            'note' => 'nullable|string',
+        ]);
+
+        $start = \Carbon\Carbon::parse($request->start_date);
+        $end = \Carbon\Carbon::parse($request->end_date);
+        $days = $start->diffInDays($end);
+        if ($days == 0) {
+            $days = 1;
+        }
+
+        DB::transaction(function () use ($request, $cart, $days) {
+
+            $grandTotal = 0;
+            foreach ($cart as $id => $item) {
+                $grandTotal += $item['price'] * $item['quantity'] * $days;
+            }
+
+            $order = Order::create([
+                'user_id' => Auth::id(),
+                'order_number' => 'RNT-' . strtoupper(uniqid()),
+                'start_date' => $request->start_date,
+                'end_date' => $request->end_date,
+                'total_days' => $days,
+                'total_price' => $grandTotal,
+                'status' => 'pending',
+                'note' => $request->note,
+            ]);
+
+            foreach ($cart as $id => $item) {
+                OrderItem::create([
+                    'order_id' => $order->id,
+                    'fabric_id' => $id,
+                    'quantity' => $item['quantity'],
+                    'price_per_meter' => $item['price'],
+                    'subtotal' => $item['price'] * $item['quantity'] * $days,
+                ]);
+            }
+        });
+
+        session()->forget('cart');
+        return redirect()->route('orders.index')->with('success', 'Order placed successfully!');
     }
 }
