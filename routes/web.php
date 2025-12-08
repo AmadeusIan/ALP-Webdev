@@ -5,7 +5,9 @@ use App\Http\Controllers\InventoryLogController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\FabricController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\CalendarController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\MeetingController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -18,8 +20,20 @@ Route::get('/dashboard', function () {
 
 Route::get('/fabrics', [FabricController::class, 'index'])->name('fabrics.index');
 
-// Halaman Admin
 Route::middleware(['auth'])->group(function () {
+    Route::get('/calendar', [CalendarController::class,'myCalendar'])->name('calendar.my');
+    Route::get('/calendar/events', [CalendarController::class,'myEvents'])->name('calendar.events.my');
+
+// Route GET → tampilkan form
+Route::get('/meeting-request', [MeetingController::class, 'create'])->name('meeting-request.create');
+
+// Route POST → proses form submit
+Route::post('/meeting-request', [MeetingController::class, 'store'])->name('meeting-request.store');
+
+});
+
+// Halaman Admin
+Route::middleware(['auth', 'is_admin'])->group(function () {
     Route::get('/fabrics/create', [FabricController::class, 'create'])->name('fabrics.create');
     Route::post('/fabrics', [FabricController::class, 'store'])->name('fabrics.store');
     
@@ -47,12 +61,6 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('/orders/{order}/approve', [OrderController::class, 'approve'])->name('orders.approve');
     Route::patch('/orders/{order}/reject', [OrderController::class, 'reject'])->name('orders.reject');
     
-    Route::get('cart', [CartController::class, 'index'])->name('cart.index');
-    Route::post('add-to-cart/{id}', [CartController::class, 'add'])->name('cart.add');
-    Route::delete('remove-from-cart', [CartController::class, 'remove'])->name('cart.remove');
-    Route::patch('update-cart', [CartController::class, 'updateCart'])->name('cart.update');
-
-    Route::post('/checkout', [OrderController::class, 'storeCart'])->name('orders.storeCart');
 });
 
 Route::get('/fabrics/{fabric}', [FabricController::class, 'show'])->name('fabrics.show');
