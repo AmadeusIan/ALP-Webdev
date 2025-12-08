@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\InventoryLogController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\FabricController;
+use App\Http\Controllers\CalendarController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -13,6 +14,11 @@ Route::get('/', function () {
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::get('/calendar', [CalendarController::class, 'myCalendar'])
+     ->middleware('auth')
+     ->name('calendar.my');
+
 
 
 Route::get('/fabrics', [FabricController::class, 'index'])->name('fabrics.index');
@@ -46,6 +52,11 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('/orders/{order}/approve', [OrderController::class, 'approve'])->name('orders.approve');
     Route::patch('/orders/{order}/reject', [OrderController::class, 'reject'])->name('orders.reject');
     
+    //schedule routes
+    Route::get('/calendar-events/user/{id}', [CalendarController::class, 'getUserEventsbyId'])->name('calendar.user_events_id');
+    Route::get('/calendar-events/all', [CalendarController::class, 'getAllEvents'])->name('calendar.all_events');
+
+
 });
 
 Route::get('/fabrics/{fabric}', [FabricController::class, 'show'])->name('fabrics.show');
