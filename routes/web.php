@@ -61,6 +61,23 @@ Route::middleware(['auth', 'is_admin'])->group(function () {
     Route::patch('/orders/{order}/approve', [OrderController::class, 'approve'])->name('orders.approve');
     Route::patch('/orders/{order}/reject', [OrderController::class, 'reject'])->name('orders.reject');
     
+    //schedule routes
+
+    Route::get('/users/{meeting}/calendar', [CalendarController::class,'adminUser'])->name('calendar.user');
+    Route::get('/users/{meeting}/calendar/events', [CalendarController::class,'userEvents'])->name('calendar.events.user');
+
+    Route::get('/meetings', [MeetingController::class,'adminIndex'])->name('admin.meetings.index');
+    Route::post('/meetings/{meeting}/approve', [MeetingController::class,'accept'])->name('admin.meetings.approve');
+    Route::post('/meetings/{meeting}/reject', [MeetingController::class,'reject'])->name('admin.meetings.reject');
+
+
+
+    Route::get('cart', [CartController::class, 'index'])->name('cart.index');
+    Route::post('add-to-cart/{id}', [CartController::class, 'add'])->name('cart.add');
+    Route::delete('remove-from-cart', [CartController::class, 'remove'])->name('cart.remove');
+    Route::patch('update-cart', [CartController::class, 'updateCart'])->name('cart.update');
+
+    Route::post('/checkout', [OrderController::class, 'storeCart'])->name('orders.storeCart');
 });
 
 Route::get('/fabrics/{fabric}', [FabricController::class, 'show'])->name('fabrics.show');
