@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\InventoryLogController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\FabricController;
+use App\Http\Controllers\CartController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -46,6 +47,12 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('/orders/{order}/approve', [OrderController::class, 'approve'])->name('orders.approve');
     Route::patch('/orders/{order}/reject', [OrderController::class, 'reject'])->name('orders.reject');
     
+    Route::get('cart', [CartController::class, 'index'])->name('cart.index');
+    Route::post('add-to-cart/{id}', [CartController::class, 'add'])->name('cart.add');
+    Route::delete('remove-from-cart', [CartController::class, 'remove'])->name('cart.remove');
+    Route::patch('update-cart', [CartController::class, 'updateCart'])->name('cart.update');
+
+    Route::post('/checkout', [OrderController::class, 'storeCart'])->name('orders.storeCart');
 });
 
 Route::get('/fabrics/{fabric}', [FabricController::class, 'show'])->name('fabrics.show');
