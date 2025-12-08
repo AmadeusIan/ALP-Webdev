@@ -6,6 +6,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\FabricController;
 use App\Http\Controllers\CalendarController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\MeetingController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -15,16 +16,23 @@ Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::get('/calendar', [CalendarController::class, 'myCalendar'])
-     ->middleware('auth')
-     ->name('calendar.my');
-
-
 
 Route::get('/fabrics', [FabricController::class, 'index'])->name('fabrics.index');
 
-// Halaman Admin
 Route::middleware(['auth'])->group(function () {
+    Route::get('/calendar', [CalendarController::class,'myCalendar'])->name('calendar.my');
+    Route::get('/calendar/events', [CalendarController::class,'myEvents'])->name('calendar.events.my');
+
+// Route GET → tampilkan form
+Route::get('/meeting-request', [MeetingController::class, 'create'])->name('meeting-request.create');
+
+// Route POST → proses form submit
+Route::post('/meeting-request', [MeetingController::class, 'store'])->name('meeting-request.store');
+
+});
+
+// Halaman Admin
+Route::middleware(['auth', 'is_admin'])->group(function () {
     Route::get('/fabrics/create', [FabricController::class, 'create'])->name('fabrics.create');
     Route::post('/fabrics', [FabricController::class, 'store'])->name('fabrics.store');
     
@@ -53,8 +61,14 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('/orders/{order}/reject', [OrderController::class, 'reject'])->name('orders.reject');
     
     //schedule routes
-    Route::get('/calendar-events/user/{id}', [CalendarController::class, 'getUserEventsbyId'])->name('calendar.user_events_id');
-    Route::get('/calendar-events/all', [CalendarController::class, 'getAllEvents'])->name('calendar.all_events');
+
+    Route::get('/users/{meeting}/calendar', [CalendarController::class,'adminUser'])->name('calendar.user');
+    Route::get('/users/{meeting}/calendar/events', [CalendarController::class,'userEvents'])->name('calendar.events.user');
+
+    Route::get('/meetings', [MeetingController::class,'adminIndex'])->name('admin.meetings.index');
+    Route::post('/meetings/{meeting}/approve', [MeetingController::class,'accept'])->name('admin.meetings.approve');
+    Route::post('/meetings/{meeting}/reject', [MeetingController::class,'reject'])->name('admin.meetings.reject');
+
 
 
 });

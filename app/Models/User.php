@@ -11,6 +11,14 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     protected $guarded = ['id'];
+    
+    protected $fillable = [
+    'name',
+    'email',
+    'password',
+    'role',
+];
+
 
     // Relasi User punya banyak Order
     public function orders() {
