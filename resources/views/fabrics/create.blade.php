@@ -1,70 +1,96 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">Add New Fabric</h2>
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            {{ __('Add New Fabric') }}
+        </h2>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-2xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-                
-                <form method="POST" action="{{ route('fabrics.store') }}">
+    <div class="py-12 bg-gray-50">
+        <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white shadow-lg sm:rounded-2xl p-8 border border-gray-100">
+
+                <h3 class="text-lg font-bold text-gray-900 mb-6 pb-4 border-b border-gray-100">Fabric Information</h3>
+
+                <form method="POST" action="{{ route('fabrics.store') }}" class="space-y-6">
                     @csrf
 
-                    <div class="mb-4">
-                        <label class="block font-medium text-sm text-gray-700">Fabric Name</label>
-                        <input type="text" name="name" class="border-gray-300 rounded-md shadow-sm w-full mt-1" required>
+                    <div>
+                        <label class="block font-medium text-sm text-gray-700 mb-1">Fabric Name</label>
+                        <input type="text" name="name"
+                            class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 transition"
+                            placeholder="Ex: Premium Silk" required>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <label class="block font-medium text-sm text-gray-700">Category</label>
-                            <select name="category_id" class="border-gray-300 rounded-md shadow-sm w-full mt-1" required>
-                                @foreach($categories as $cat)
+                            <label class="block font-medium text-sm text-gray-700 mb-1">Category</label>
+                            <select name="category_id"
+                                class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 cursor-pointer"
+                                required>
+                                @foreach ($categories as $cat)
                                     <option value="{{ $cat->id }}">{{ $cat->name }}</option>
                                 @endforeach
                             </select>
                         </div>
 
                         <div>
-                            <label class="block font-medium text-sm text-gray-700">Supplier</label>
-                            <select name="supplier_id" class="border-gray-300 rounded-md shadow-sm w-full mt-1" required>
-                                @foreach($suppliers as $sup)
+                            <label class="block font-medium text-sm text-gray-700 mb-1">Supplier</label>
+                            <select name="supplier_id"
+                                class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 cursor-pointer"
+                                required>
+                                @foreach ($suppliers as $sup)
                                     <option value="{{ $sup->id }}">{{ $sup->name }}</option>
                                 @endforeach
                             </select>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <label class="block font-medium text-sm text-gray-700">Color</label>
-                            <input type="text" name="color" class="border-gray-300 rounded-md shadow-sm w-full mt-1">
+                            <label class="block font-medium text-sm text-gray-700 mb-1">Color</label>
+                            <input type="text" name="color"
+                                class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                                placeholder="Ex: Navy Blue">
                         </div>
                         <div>
-                            <label class="block font-medium text-sm text-gray-700">Material</label>
-                            <input type="text" name="material" class="border-gray-300 rounded-md shadow-sm w-full mt-1">
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-4 mb-4">
-                        <div>
-                            <label class="block font-medium text-sm text-gray-700">Price / meter (Rp)</label>
-                            <input type="number" name="price_per_meter" class="border-gray-300 rounded-md shadow-sm w-full mt-1" required>
-                        </div>
-                        <div>
-                            <label class="block font-medium text-sm text-gray-700">Initial Stock (m)</label>
-                            <input type="number" name="stock_meter" class="border-gray-300 rounded-md shadow-sm w-full mt-1" required>
+                            <label class="block font-medium text-sm text-gray-700 mb-1">Material</label>
+                            <input type="text" name="material"
+                                class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                                placeholder="Ex: 100% Cotton">
                         </div>
                     </div>
 
-                    <div class="mb-6">
-                        <label class="block font-medium text-sm text-gray-700">Description</label>
-                        <textarea name="description" class="border-gray-300 rounded-md shadow-sm w-full mt-1" rows="3"></textarea>
+                    <div class="p-4 bg-gray-50 rounded-lg border border-gray-200 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block font-bold text-sm text-gray-700 mb-1">Price / meter (Rp)</label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-2 text-gray-500">Rp</span>
+                                <input type="number" name="price_per_meter"
+                                    class="w-full pl-10 border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 font-bold text-gray-800"
+                                    placeholder="0" required>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block font-bold text-sm text-gray-700 mb-1">Initial Stock (m)</label>
+                            <input type="number" name="stock_meter"
+                                class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 font-bold text-gray-800"
+                                placeholder="0" required>
+                        </div>
                     </div>
 
-                    <div class="flex justify-end gap-2">
-                        <a href="{{ route('fabrics.index') }}" class="px-4 py-2 bg-gray-300 rounded-md text-gray-700 hover:bg-gray-400">Cancel</a>
-                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Save Fabric</button>
+                    <div>
+                        <label class="block font-medium text-sm text-gray-700 mb-1">Description</label>
+                        <textarea name="description"
+                            class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500" rows="3"
+                            placeholder="Add details about texture, usage, etc..."></textarea>
+                    </div>
+
+                    <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
+                        <a href="{{ route('fabrics.index') }}"
+                            class="px-6 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition">Cancel</a>
+                        <button type="submit"
+                            class="px-6 py-2.5 bg-black text-white rounded-lg hover:bg-gray-800 shadow-lg transition font-bold">Save
+                            Fabric</button>
                     </div>
                 </form>
 

@@ -14,6 +14,30 @@ use Illuminate\Http\Request;
 
 class FabricController extends Controller
 {
+
+
+    public function homepage(){
+        $fabrics = Fabric::latest()->take(6)->get();
+        $reviews = collect([
+            (object)[
+                'user' => (object)['name' => 'Sarah Amalia'],
+                'rating' => 5,
+                'review' => 'Kualitas kain sangat bagus, dingin dan jatuh. Cocok untuk gaun pesta.'
+            ],
+            (object)[
+                'user' => (object)['name' => 'Budi Santoso'],
+                'rating' => 5,
+                'review' => 'Pelayanan sewa sangat cepat dan admin ramah. Recommended vendor!'
+            ],
+            (object)[
+                'user' => (object)['name' => 'Jessica Tan'],
+                'rating' => 4,
+                'review' => 'Pilihan warnanya lengkap banget. Suka sekali dengan koleksi sutranya.'
+            ],
+        ]);
+
+        return view('welcome', compact('fabrics', 'reviews'));
+    }
     
     public function index(Request $request)
     {
@@ -28,8 +52,10 @@ class FabricController extends Controller
             $query->where('category_id', $request->category_id);
         }
 
-        $fabrics = $query->latest()->get();
+        $fabrics = $query->latest()->paginate(12);
         $categories = Category::all();
+
+        
 
         return view('fabrics.index', compact('fabrics', 'categories'));
     }
