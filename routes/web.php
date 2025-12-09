@@ -1,13 +1,14 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\InventoryLogController;
+use auth;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\CartController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\FabricController;
-use App\Http\Controllers\CartController;
-use App\Http\Controllers\CalendarController;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MeetingController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\CalendarController;
+use App\Http\Controllers\InventoryLogController;
 
 Route::get('/', function () {
     return view('welcome');

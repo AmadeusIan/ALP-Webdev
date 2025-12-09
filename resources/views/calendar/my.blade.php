@@ -1,6 +1,5 @@
-@extends('layouts.app')
-
-@section('content')
+<x-app-layout>
+    <x-slot name="header">
 <h2 class="text-2xl font-semibold text-white text-center my-6">My Calendar</h2>
 
 <div id="calendar" data-user-id="{{ auth()->id() }}"></div>
@@ -83,4 +82,5 @@ document.addEventListener('DOMContentLoaded', () => {
     calendar.render();
 });
 </script>
-@endsection
+</x-slot>
+</x-app-layout>
