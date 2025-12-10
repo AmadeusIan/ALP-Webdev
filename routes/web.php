@@ -1,10 +1,8 @@
 <?php
 
-use auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\OrderController;
-use App\Models\Fabric;
 use App\Http\Controllers\FabricController;
 use App\Http\Controllers\MeetingController;
 use App\Http\Controllers\ProfileController;

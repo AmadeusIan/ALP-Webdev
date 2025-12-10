@@ -22,7 +22,7 @@ public function up()
         $table->string('material')->nullable();
         $table->decimal('price_per_meter', 10, 2);
         $table->decimal('stock_meter', 10, 2)->default(0);
-        $table->image_url('image')->nullable();
+        $table->string('image')->nullable();
         $table->string('description',255)->nullable();
         $table->timestamps();
     });
