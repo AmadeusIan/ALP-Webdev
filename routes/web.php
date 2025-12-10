@@ -39,12 +39,18 @@ Route::middleware(['auth'])->group(function () {
 
     //cart
 
-    Route::get('cart', [CartController::class, 'index'])->name('cart.index');
+    Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
     Route::post('add-to-cart/{id}', [CartController::class, 'add'])->name('cart.add');
     Route::delete('remove-from-cart', [CartController::class, 'remove'])->name('cart.remove');
     Route::patch('update-cart', [CartController::class, 'updateCart'])->name('cart.update');
 
     Route::post('/checkout', [OrderController::class, 'storeCart'])->name('orders.storeCart');
+
+
+    //profile 
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
 // Halaman Admin
@@ -63,9 +69,7 @@ Route::middleware(['auth', 'is_admin'])->group(function () {
     Route::post('/fabrics/{fabric}/stock', [FabricController::class, 'updateStock'])->name('fabrics.updateStock');
 
 
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
 
     Route::get('/inventory-logs', [InventoryLogController::class, 'index'])->name('inventory_logs.index');
 
