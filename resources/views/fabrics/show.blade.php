@@ -112,22 +112,33 @@
                                 <form action="{{ route('cart.add', $fabric->id) }}" method="POST"
                                     class="bg-gray-50 p-6 rounded-xl border border-indigo-100">
                                     @csrf
-                                    <label
-                                        class="block text-xs font-bold text-gray-500 uppercase mb-2 tracking-wide">Quantity
-                                        Needed (Meters)</label>
 
-                                    <div class="flex gap-3">
+                                    <label class="block text-xs font-bold text-gray-500 uppercase mb-2 tracking-wide">
+                                        Quantity Needed (Meters)
+                                    </label>
+
+                                    <div class="flex gap-3 mb-4">
                                         <input type="number" name="quantity" value="1" min="1"
                                             max="{{ $fabric->stock_meter }}"
                                             class="w-24 text-center border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 font-bold text-lg">
+                                    </div>
 
+                                    <div class="flex flex-col gap-3">
                                         <button type="submit"
-                                            class="flex-1 bg-black text-white px-6 py-3 rounded-lg font-bold hover:bg-gray-800 shadow-lg transition transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                                            class="w-full bg-black text-white px-6 py-3 rounded-lg font-bold hover:bg-gray-800 shadow-lg transition transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
                                             {{ $fabric->stock_meter <= 0 ? 'disabled' : '' }}>
                                             {{ $fabric->stock_meter > 0 ? '+ Add to Cart' : 'Unavailable' }}
                                         </button>
+
+                                        @if ($fabric->stock_meter > 0)
+                                            <a href="{{ route('orders.create', $fabric) }}"
+                                                class="w-full text-center border-2 border-black text-black px-6 py-3 rounded-lg font-bold hover:bg-gray-200 transition">
+                                                Rent Now (Direct Book)
+                                            </a>
+                                        @endif
                                     </div>
-                                    <p class="text-xs text-gray-400 mt-2 text-center">Secure your booking today.</p>
+
+                                    <p class="text-xs text-gray-400 mt-4 text-center">Secure your booking today.</p>
                                 </form>
                             @endif
                         </div>

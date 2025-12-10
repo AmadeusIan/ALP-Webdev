@@ -2,13 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\FonnteService;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Fabric;
+use App\Models\Notification;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use PHPUnit\Framework\TestStatus\Notice;
 
 class OrderController extends Controller
 {
@@ -35,21 +39,21 @@ class OrderController extends Controller
 
         $start = Carbon::parse($request->start_date);
         $end = Carbon::parse($request->end_date);
-        $days = $start->diffInDays($end) ?: 1; 
+        $days = $start->diffInDays($end) ?: 1;
 
 
         $subtotal = ($fabric->price_per_meter * $request->quantity) * $days;
-        $totalPrice = $subtotal; 
+        $grandTotal = $subtotal;
 
-        DB::transaction(function () use ($request, $fabric, $days, $totalPrice, $subtotal) {
-            
+        DB::transaction(function () use ($request, $fabric, $days, $grandTotal, $subtotal) {
+
             $order = Order::create([
                 'user_id' => Auth::id(),
                 'order_number' => 'RNT-' . time(),
                 'start_date' => $request->start_date,
                 'end_date' => $request->end_date,
                 'total_days' => $days,
-                'total_price' => $totalPrice,
+                'total_price' => $grandTotal,
                 'status' => 'pending',
                 'note' => $request->note,
             ]);
@@ -61,6 +65,53 @@ class OrderController extends Controller
                 'price_per_meter' => $fabric->price_per_meter,
                 'subtotal' => $subtotal,
             ]);
+
+
+            Notification::create([
+                'user_id' => $order->user_id,
+                'title' => 'Order Created',
+                'message' => 'Your order #' . $order->order_number . ' has been created and is pending approval.',
+                'type' => 'order_info',
+                'is_read' => false,
+            ]);
+
+            $admins = User::where('role', 'admin')->get();
+            foreach ($admins as $admin) {
+                Notification::create([
+                    'user_id' => $admin->id,
+                    'title' => 'New Order Pending Approval',
+                    'message' => 'User ' . $request->user()->name . ' has created order #' . $order->order_number . ' awaiting your approval.',
+                    'type' => 'order_info',
+                    'is_read' => false,
+                ]);
+            }
+
+
+            if ($request->user()->phone) {
+                $pesanUser = "Halo Kak *{$request->user()->name}*,\n\n" .
+                    "Terima kasih! Pesanan Anda telah berhasil dibuat. Berikut detailnya:\n\n" .
+                    "*No. Order:* #{$order->order_number}\n" .
+                    "*Total:* Rp " . number_format($grandTotal, 0, ',', '.') . "\n" .
+                    "*Status:* Menunggu Konfirmasi Admin\n\n" .
+                    "Mohon tunggu sebentar ya, Admin kami akan segera mengecek pesanan Anda.\n\n" .
+                    "Terima kasih telah memilih Kana Covers! ";
+
+                FonnteService::send($request->user()->phone, $pesanUser);
+            }
+
+            $admins = User::where('role', 'admin')->get();
+            foreach ($admins as $admin) {
+                if ($admin->phone) {
+                    $pesanAdmin = "🔔*PESANAN BARU MASUK*\n\n" .
+                        "Halo Admin, ada pesanan baru yang perlu diproses:\n\n" .
+                        "*Customer:* {$request->user()->name}\n" .
+                        "*No. Order:* #{$order->order_number}\n" .
+                        "*Total:* Rp " . number_format($grandTotal, 0, ',', '.') . "\n\n" .
+                        "Mohon segera login ke dashboard untuk melakukan konfirmasi. ";
+
+                    FonnteService::send($admin->phone, $pesanAdmin);
+                }
+            }
 
             // C. Kurangi Stok?
             // Opsional: Langsung kurangi stok atau tunggu Admin Approve.
@@ -91,18 +142,56 @@ class OrderController extends Controller
     {
 
         $order->update(['status' => 'approved']);
-        
+
+        Notification::create([
+            'user_id' => $order->user_id,
+            'title' => 'Order Approved',
+            'message' => 'Your order #' . $order->order_number . ' has been approved by the admin.',
+            'type' => 'order_info',
+            'is_read' => false,
+        ]);
+
+
+        if ($order->user->phone) {
+            $pesan = "✅ *PESANAN DISETUJUI*\n\n" .
+                "Halo Kak *{$order->user->name}*,\n\n" .
+                "Kabar gembira! Pesanan Anda dengan nomor *#{$order->order_number}* telah disetujui oleh Admin.\n\n" .
+                "*Langkah Selanjutnya:*\n" .
+                "Silakan lakukan pembayaran atau persiapan pengambilan barang sesuai jadwal sewa.\n\n" .
+                "Terima kasih telah memilih Kana Covers!";
+
+            FonnteService::send($order->user->phone, $pesan);
+        }
+
         return redirect()->back()->with('success', 'Order #' . $order->order_number . ' has been approved!');
     }
 
     public function reject(Order $order)
     {
         $order->update(['status' => 'rejected']);
-        
+
+        Notification::create([
+            'user_id' => $order->user_id,
+            'title' => 'Order Rejected',
+            'message' => 'Your order #' . $order->order_number . ' has been rejected by the admin.',
+            'type' => 'order_info',
+            'is_read' => false,
+        ]);
+
+        if ($order->user->phone) {
+            $pesan = " *PESANAN TIDAK DAPAT DIPROSES*\n\n" .
+                "Halo Kak *{$order->user->name}*,\n\n" .
+                "Mohon maaf, pesanan Anda dengan nomor *#{$order->order_number}* saat ini tidak dapat kami proses (Stok tidak tersedia / Jadwal penuh).\n\n" .
+                "Silakan hubungi Admin kami jika Anda ingin berkonsultasi mengenai opsi kain pengganti.\n\n" .
+                "Terima kasih atas pengertiannya. 🙏";
+
+            FonnteService::send($order->user->phone, $pesan);
+        }
+
         return redirect()->back()->with('success', 'Order #' . $order->order_number . ' has been rejected.');
     }
 
-        public function storeCart(Request $request)
+    public function storeCart(Request $request)
     {
 
         $cart = session()->get('cart', []);
@@ -151,7 +240,43 @@ class OrderController extends Controller
                     'subtotal' => $item['price'] * $item['quantity'] * $days,
                 ]);
             }
+
+            Notification::create([
+                'user_id' => Auth::id(),
+                'title' => 'Fabric Added to Cart',
+                'message' => 'You have placed an order #' . $order->order_number . ' with total price ' . $grandTotal . '.',
+                'type' => 'cart_info',
+                'is_read' => false,
+            ]);
+
+            if ($request->user()->phone) {
+                $pesanUser = "Halo Kak *{$request->user()->name}*,\n\n" .
+                    "Terima kasih! Pesanan Anda telah berhasil dibuat. Berikut detailnya:\n\n" .
+                    "*No. Order:* #{$order->order_number}\n" .
+                    "*Total:* Rp " . number_format($grandTotal, 0, ',', '.') . "\n" .
+                    "*Status:* Menunggu Konfirmasi Admin\n\n" .
+                    "Mohon tunggu sebentar ya, Admin kami akan segera mengecek pesanan Anda.\n\n" .
+                    "Terima kasih telah memilih Kana Covers! ";
+
+                FonnteService::send($request->user()->phone, $pesanUser);
+            }
+
+            $admins = User::where('role', 'admin')->get();
+            foreach ($admins as $admin) {
+                if ($admin->phone) {
+                    $pesanAdmin = "🔔*PESANAN BARU MASUK*\n\n" .
+                        "Halo Admin, ada pesanan baru yang perlu diproses:\n\n" .
+                        "*Customer:* {$request->user()->name}\n" .
+                        "*No. Order:* #{$order->order_number}\n" .
+                        "*Total:* Rp " . number_format($grandTotal, 0, ',', '.') . "\n\n" .
+                        "Mohon segera login ke dashboard untuk melakukan konfirmasi. ";
+
+                    FonnteService::send($admin->phone, $pesanAdmin);
+                }
+            }
         });
+
+
 
         session()->forget('cart');
         return redirect()->route('orders.index')->with('success', 'Order placed successfully!');

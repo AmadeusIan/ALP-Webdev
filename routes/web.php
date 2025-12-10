@@ -8,6 +8,7 @@ use App\Http\Controllers\MeetingController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\InventoryLogController;
+use App\Http\Controllers\NotificationController;
 
 Route::get('/', [FabricController::class, 'homepage'])->name('welcome.homepage');
 
@@ -32,6 +33,7 @@ Route::middleware(['auth'])->group(function () {
     //order
 
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+    Route::get('/fabrics/{fabric}/book', [OrderController::class, 'create'])->name('orders.create');
     Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
 
 
@@ -49,6 +51,12 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    //notifications
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::patch('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
+    Route::patch('/notifications/read-all', [NotificationController::class, 'markAllasRead'])->name('notifications.markAllAsRead');
+    Route::delete('/notifications/{id}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
 });
 
 // Halaman Admin
@@ -72,7 +80,6 @@ Route::middleware(['auth', 'is_admin'])->group(function () {
     Route::get('/inventory-logs', [InventoryLogController::class, 'index'])->name('inventory_logs.index');
 
 
-    Route::get('/fabrics/{fabric}/book', [OrderController::class, 'create'])->name('orders.create');
 
 
     Route::patch('/orders/{order}/approve', [OrderController::class, 'approve'])->name('orders.approve');

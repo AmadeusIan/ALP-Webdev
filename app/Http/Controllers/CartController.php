@@ -4,8 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Fabric;
-use App\Models\Order;
-use App\Models\OrderItem;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -40,6 +38,9 @@ class CartController extends Controller
                 "max_stock" => $fabric->stock
             ];
         }
+
+        
+
 
         session()->put('cart', $cart);
         return redirect()->route('cart.index')->with('success', 'Fabric added to cart successfully!');

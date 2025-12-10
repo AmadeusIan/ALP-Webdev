@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'Admin Fabric',
             'email' => 'admin@gmail.com', // Email untuk login
             'password' => bcrypt('password123'),
+            'phone' => '082137943030',
             'role' => 'admin', // Pastikan kolom role ada
         ]);
 
@@ -25,6 +26,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'User',
             'email' => 'user@gmail.com', // Email untuk login
             'password' => bcrypt('password123'),
+            'phone' => '082137943030',
             'role' => 'user', // Pastikan kolom role ada
         ]);
 

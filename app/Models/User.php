@@ -17,7 +17,7 @@ class User extends Authenticatable
     'email',
     'password',
     'role',
-    'phone_number',
+    'phone',
 ];
 
 
@@ -34,5 +34,10 @@ class User extends Authenticatable
     // Relasi User punya banyak Notifikasi
     public function notifications() {
         return $this->hasMany(Notification::class);
+    }
+
+    public function unreadNotifications()
+    {
+        return $this->hasmany(Notification::class)->where('is_read', false);
     }
 }
