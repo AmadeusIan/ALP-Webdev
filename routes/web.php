@@ -34,7 +34,9 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/fabrics/{fabric}/book', [OrderController::class, 'create'])->name('orders.create');
+    Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
     Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
+    Route::patch('/orders/{order}/update-price', [OrderController::class, 'updatePrice'])->name('orders.updatePrice');
 
 
     //cart

@@ -7,7 +7,6 @@
     <div class="min-h-screen bg-stone-50 pb-20">
         
         <div class="bg-black text-white pt-32 pb-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-            
             <div class="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
             
             <div class="max-w-7xl mx-auto relative z-10">
@@ -57,10 +56,7 @@
                                 <th class="py-5 px-6 font-sans text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em]">Duration</th>
                                 <th class="py-5 px-6 font-sans text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em]">Total Bill</th>
                                 <th class="py-5 px-6 font-sans text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em]">Status</th>
-                                
-                                @if (Auth::user()->role === 'admin')
-                                    <th class="py-5 px-6 font-sans text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em] text-right">Control</th>
-                                @endif
+                                <th class="py-5 px-6 font-sans text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em] text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-stone-100">
@@ -68,34 +64,36 @@
                                 <tr class="group hover:bg-stone-50/50 transition duration-300">
                                     
                                     <td class="py-6 px-6 align-top">
-                                        <span class="font-serif text-lg font-bold text-gray-900">
+                                        <a href="{{ route('orders.show', $order) }}" class="font-serif text-lg font-bold text-gray-900 hover:text-indigo-600 transition underline decoration-stone-200 underline-offset-4">
                                             #{{ $order->order_number ?? str_pad($order->id, 4, '0', STR_PAD_LEFT) }}
-                                        </span>
+                                        </a>
                                         <div class="text-[10px] text-gray-400 font-bold uppercase tracking-wider mt-1">
                                             {{ $order->created_at->format('d M Y') }}
                                         </div>
                                     </td>
 
                                     <td class="py-6 px-6 align-top">
-                                        <ul class="space-y-3">
-                                            @foreach ($order->items as $item)
-                                                <li class="flex items-start gap-3">
-                                                    <div class="w-8 h-8 bg-stone-200 rounded-none shrink-0 overflow-hidden">
-                                                        @if($item->fabric->image)
-                                                            <img src="{{ asset($item->fabric->image) }}" class="w-full h-full object-cover">
-                                                        @endif
-                                                    </div>
-                                                    <div>
-                                                        <span class="block font-serif text-sm text-gray-900 leading-none mb-1">
-                                                            {{ $item->fabric->name }}
-                                                        </span>
-                                                        <span class="block font-sans text-[10px] font-bold text-gray-400 uppercase tracking-wider">
-                                                            {{ $item->quantity }} Meters
-                                                        </span>
-                                                    </div>
-                                                </li>
-                                            @endforeach
-                                        </ul>
+                                        <a href="{{ route('orders.show', $order) }}" class="block group-hover:opacity-80 transition">
+                                            <ul class="space-y-3">
+                                                @foreach ($order->items as $item)
+                                                    <li class="flex items-start gap-3">
+                                                        <div class="w-8 h-8 bg-stone-200 rounded-none shrink-0 overflow-hidden">
+                                                            @if($item->fabric->image)
+                                                                <img src="{{ asset($item->fabric->image) }}" class="w-full h-full object-cover">
+                                                            @endif
+                                                        </div>
+                                                        <div>
+                                                            <span class="block font-serif text-sm text-gray-900 leading-none mb-1">
+                                                                {{ $item->fabric->name }}
+                                                            </span>
+                                                            <span class="block font-sans text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                                                                {{ $item->quantity }} Meters
+                                                            </span>
+                                                        </div>
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        </a>
                                     </td>
 
                                     <td class="py-6 px-6 align-top">
@@ -132,28 +130,32 @@
                                         </span>
                                     </td>
 
-                                    @if (Auth::user()->role === 'admin')
-                                        <td class="py-6 px-6 align-top text-right">
-                                            @if ($order->status === 'pending')
-                                                <div class="flex justify-end gap-2">
-                                                    <form action="{{ route('orders.approve', $order) }}" method="POST">
-                                                        @csrf @method('PATCH')
-                                                        <button type="submit" class="w-8 h-8 flex items-center justify-center border border-black text-black hover:bg-black hover:text-white transition duration-300" title="Approve">
-                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                                                        </button>
-                                                    </form>
-                                                    <form action="{{ route('orders.reject', $order) }}" method="POST" onsubmit="return confirm('Reject this order?')">
-                                                        @csrf @method('PATCH')
-                                                        <button type="submit" class="w-8 h-8 flex items-center justify-center border border-stone-200 text-stone-400 hover:border-red-500 hover:text-red-500 transition duration-300" title="Reject">
-                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                                                        </button>
-                                                    </form>
-                                                </div>
-                                            @else
-                                                <span class="text-stone-300 text-lg">&bull;</span>
+                                    <td class="py-6 px-6 align-top text-right">
+                                        <div class="flex justify-end gap-2">
+                                            
+                                            <a href="{{ route('orders.show', $order) }}" 
+                                               class="w-8 h-8 flex items-center justify-center border border-stone-200 text-stone-400 hover:border-black hover:text-black transition duration-300" 
+                                               title="View Details">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                            </a>
+
+                                            @if (Auth::user()->role === 'admin' && $order->status === 'pending')
+                                                <form action="{{ route('orders.approve', $order->id) }}" method="POST">
+                                                    @csrf @method('PATCH')
+                                                    <button type="submit" class="w-8 h-8 flex items-center justify-center border border-black text-black hover:bg-black hover:text-white transition duration-300" title="Approve">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                                    </button>
+                                                </form>
+                                                <form action="{{ route('orders.reject', $order->id) }}" method="POST" onsubmit="return confirm('Reject this order?')">
+                                                    @csrf @method('PATCH')
+                                                    <button type="submit" class="w-8 h-8 flex items-center justify-center border border-stone-200 text-stone-400 hover:border-red-500 hover:text-red-500 transition duration-300" title="Reject">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                                    </button>
+                                                </form>
                                             @endif
-                                        </td>
-                                    @endif
+
+                                        </div>
+                                    </td>
                                 </tr>
                             @empty
                                 <tr>

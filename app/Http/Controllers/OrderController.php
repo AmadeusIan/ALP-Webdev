@@ -137,6 +137,46 @@ class OrderController extends Controller
     }
 
 
+    public function show(Order $order)
+    {
+
+        $order->load(['user', 'items.fabric']);
+        return view('orders.show', compact('order'));
+    }
+
+    public function updatePrice(Request $request, Order $order)
+    {
+        if ($order->status !== 'pending') {
+            return redirect()->back()->with('error', 'Cannot edit price for processed orders');
+        }
+
+        $request->validate([
+            'items' => 'required|array',
+            'items.*.price_per_meter' => 'required|numeric|min:0'
+        ]);
+
+        $newGrandTotal = 0;
+
+        foreach ($request->items as $itemId => $data) {
+            $item = $order->items()->find($itemId);
+
+            if ($item) {
+                $pricePerMeter = $data['price_per_meter'];
+                $days = $order->total_days;
+                $newSubTotal = $pricePerMeter * $item->quantity * $days;
+                $item->update([
+                    'price_per_meter' => $pricePerMeter,
+                    'subtotal' => $newSubTotal
+                ]);
+
+                $newGrandTotal = +$newSubTotal;
+            }
+            $order->update(['total_price' => $newGrandTotal]);
+
+            return redirect()->back()->with('success', 'Order prices updated successfully.');
+        }
+    }
+
 
     public function approve(Order $order)
     {
