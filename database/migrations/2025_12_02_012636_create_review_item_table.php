@@ -14,12 +14,14 @@ return new class extends Migration
         Schema::create('review_items', function (Blueprint $table) {
         $table->id();
         $table->foreignId('order_item_id')->constrained('order_items')->onDelete('cascade');
-        
-        $table->string('title', 50)->nullable();
-        $table->integer('rating');
+        $table->unsignedTinyInteger('rating');
         $table->text('comment')->nullable();
-        $table->timestamp('created_at')->useCurrent();
+        $table->timestamps(); // created_at + updated_at
+        $table->unique('order_item_id');
+
     });
+
+        
     }
 
     /**
@@ -27,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('review');
+        Schema::dropIfExists('review_items');
     }
 };

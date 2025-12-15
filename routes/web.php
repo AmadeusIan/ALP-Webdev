@@ -9,6 +9,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\InventoryLogController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\ReviewItemController;
 
 Route::get('/', [FabricController::class, 'homepage'])->name('welcome.homepage');
 
@@ -19,9 +20,12 @@ Route::get('/dashboard', function () {
 
 Route::get('/fabrics', [FabricController::class, 'index'])->name('fabrics.index');
 
+Route::get('/fabrics/{id}/reviews', [ReviewItemController::class, 'reviewsForProduct'])->name('review.index');
+
 Route::middleware(['auth'])->group(function () {
+
     Route::get('/calendar', [CalendarController::class, 'myCalendar'])->name('calendar.my');
-    Route::get('/calendar/events', [CalendarController::class, 'myEvents'])->name('calendar.events.my');
+    // Route::get('/calendar/events', [CalendarController::class, 'myEvents'])->name('calendar.events.my');
 
     // Route GET → tampilkan form
     Route::get('/meeting-request', [MeetingController::class, 'create'])->name('meeting-request.create');
@@ -35,6 +39,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/fabrics/{fabric}/book', [OrderController::class, 'create'])->name('orders.create');
     Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
+    Route::get('/orders/{id}', [OrderController::class, 'show'])->name('orders.show');
 
 
     //cart
@@ -57,6 +62,15 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
     Route::patch('/notifications/read-all', [NotificationController::class, 'markAllasRead'])->name('notifications.markAllAsRead');
     Route::delete('/notifications/{id}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
+
+    //reviews
+    // Submit review baru
+   Route::post('/review-items', [ReviewItemController::class, 'store'])->name('review.store');
+
+    // UPDATE review (harus login)
+    Route::put('/review-items/{id}', [ReviewItemController::class, 'update'])->name('review.update');
+
+    // Ambil semua review untuk satu produk (bisa dipakai AJAX)
 });
 
 // Halaman Admin
@@ -75,8 +89,6 @@ Route::middleware(['auth', 'is_admin'])->group(function () {
     Route::post('/fabrics/{fabric}/stock', [FabricController::class, 'updateStock'])->name('fabrics.updateStock');
 
 
-
-
     Route::get('/inventory-logs', [InventoryLogController::class, 'index'])->name('inventory_logs.index');
 
 
@@ -85,10 +97,17 @@ Route::middleware(['auth', 'is_admin'])->group(function () {
     Route::patch('/orders/{order}/approve', [OrderController::class, 'approve'])->name('orders.approve');
     Route::patch('/orders/{order}/reject', [OrderController::class, 'reject'])->name('orders.reject');
 
+
     //schedule routes
 
     Route::get('/users/{meeting}/calendar', [CalendarController::class, 'adminUser'])->name('calendar.user');
     Route::get('/users/{meeting}/calendar/events', [CalendarController::class, 'userEvents'])->name('calendar.events.user');
+
+    //calendar admin
+    Route::get('/calendar/admin', [CalendarController::class, 'adminAll'])->name('calendar.admin');
+
+
+
 
     Route::get('/meetings', [MeetingController::class, 'adminIndex'])->name('admin.meetings.index');
     Route::post('/meetings/{meeting}/approve', [MeetingController::class, 'accept'])->name('admin.meetings.approve');

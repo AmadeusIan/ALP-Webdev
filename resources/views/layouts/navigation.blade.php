@@ -11,10 +11,17 @@
             </div>
 
             <div class="hidden md:flex space-x-8 items-center">
-                <a href="/calendar"
-                    class="text-xs font-bold text-gray-500 hover:text-black transition uppercase tracking-widest">
-                    Calendar
-                </a>
+                @if (Auth::User()?->role === 'user')
+                    <a href="/calendar"
+                        class="text-xs font-bold text-gray-500 hover:text-black transition uppercase tracking-widest">
+                        Calendar
+                    </a>
+                    <a href="/meeting-request"
+                        class="text-xs font-bold text-gray-500 hover:text-black transition uppercase tracking-widest">
+                        Add Meeting
+                    </a>
+                @endif
+                
                 <a href="{{ route('fabrics.index') }}"
                     class="text-xs font-bold text-gray-500 hover:text-black transition uppercase tracking-widest">
                     Collections
@@ -25,6 +32,10 @@
                 </a>
 
                 @if (Auth::User()?->role === 'admin')
+                    <a href="/calendar/admin"
+                        class="text-xs font-bold text-gray-500 hover:text-black transition uppercase tracking-widest">
+                        Calendar
+                    </a>
                     <a href="/inventory-logs"
                         class="text-xs font-bold text-gray-500 hover:text-black transition uppercase tracking-widest">
                         Inventory
@@ -33,6 +44,11 @@
                     <a href="/orders"
                         class="text-xs font-bold text-gray-500 hover:text-black transition uppercase tracking-widest">
                         Orders
+                    </a>
+
+                    <a href="/meetings"
+                        class="text-xs font-bold text-gray-500 hover:text-black transition uppercase tracking-widest">
+                        Meeting Requests
                     </a>
                 @endif
             </div>

@@ -15,4 +15,9 @@ class OrderItem extends Model
     public function fabric() {
         return $this->belongsTo(Fabric::class);
     }
+
+    public function review(){
+        return $this->hasOne(ReviewItem::class);
+    }
+
 }

@@ -136,6 +136,23 @@ class OrderController extends Controller
         return view('orders.index', compact('orders'));
     }
 
+    public function show($id)
+{
+    $order = Order::where('id', $id)
+        ->where('user_id', Auth::id())
+        ->with([
+            'items.fabric',
+            'items.reviewItem'
+        ])
+        ->firstOrFail();
+
+    // DEBUG STEP 2 (sementara)
+    dd($order->toArray());
+
+    return view('orders.show', compact('order'));
+}
+
+
 
 
     public function approve(Order $order)

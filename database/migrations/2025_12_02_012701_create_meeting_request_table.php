@@ -13,18 +13,14 @@ return new class extends Migration
     {
     Schema::create('meeting_requests', function (Blueprint $table) {
         $table->id();
-        $table->foreignId('user_id')->constrained('users')->onDelete('cascade'); // Customer yg request
-        $table->foreignId('schedule_id')->constrained('schedules')->onDelete('cascade');
-        $table->string('status', 50)->default('pending');
-        $table->timestamp('created_at')->useCurrent();
+        $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+        $table->string('title');
+        $table->text('description')->nullable();
+        $table->dateTime('start');
+        $table->dateTime('end');
+        $table->enum('status', ['pending','approved','rejected'])->default('pending');
+        $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        Schema::dropIfExists('meeting_request');
-    }
 };

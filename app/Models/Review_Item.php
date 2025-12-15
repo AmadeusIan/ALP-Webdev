@@ -7,9 +7,9 @@ class ReviewItem extends Model
 {
     use HasFactory;
     protected $guarded = ['id'];
-    public $timestamps = false; 
+    public $timestamps = true; 
     
     public function orderItem() {
-        return $this->belongsTo(OrderItem::class, 'order_item_id');
+        return $this->belongsTo(OrderItem::class);
     }
 }
