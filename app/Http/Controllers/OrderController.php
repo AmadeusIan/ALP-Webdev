@@ -128,9 +128,9 @@ class OrderController extends Controller
 
         if ($user->role === 'admin') {
 
-            $orders = Order::with(['user', 'items.fabric'])->latest()->paginate(10);
+            $orders = Order::with(['user', 'items.fabric', 'items.reviewItem'])->latest()->paginate(10);
         } else {
-            $orders = Order::with(['items.fabric'])->where('user_id', $user->id)->latest()->paginate(10);
+            $orders = Order::with(['items.fabric', 'items.reviewItem'])->where('user_id', $user->id)->latest()->paginate(10);
         }
 
         return view('orders.index', compact('orders'));
@@ -145,9 +145,6 @@ class OrderController extends Controller
             'items.reviewItem'
         ])
         ->firstOrFail();
-
-    // DEBUG STEP 2 (sementara)
-    dd($order->toArray());
 
     return view('orders.show', compact('order'));
 }

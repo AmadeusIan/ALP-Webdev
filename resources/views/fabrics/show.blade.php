@@ -87,6 +87,48 @@
                                 {{ $fabric->description ?? 'No description provided.' }}</p>
                         </div>
 
+                        {{-- ================= REVIEWS SECTION ================= --}}
+                            <hr class="my-10">
+
+                            <h3 class="text-sm font-bold text-gray-900 uppercase mb-4">
+                                Customer Reviews
+                            </h3>
+
+                            @if ($totalReviews > 0)
+                                <p class="text-sm text-gray-700 font-medium mb-4">
+                                    ⭐ {{ $averageRating }}/5
+                                    <span class="text-gray-400 text-xs">
+                                        ({{ $totalReviews }} review{{ $totalReviews > 1 ? 's' : '' }})
+                                    </span>
+                                </p>
+
+                                <div class="space-y-4">
+                                    @foreach ($reviews as $review)
+                                        <div class="border border-gray-200 rounded-xl p-4 bg-gray-50">
+                                            <p class="font-semibold text-gray-800">
+                                                ⭐ {{ $review->rating }}/5
+                                            </p>
+
+                                            @if ($review->comment)
+                                                <p class="text-gray-600 mt-1 italic">
+                                                    "{{ $review->comment }}"
+                                                </p>
+                                            @endif
+
+                                            <p class="text-xs text-gray-400 mt-2">
+                                                {{ $review->created_at->format('d M Y') }}
+                                            </p>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @else
+                                <p class="text-gray-400 italic text-sm">
+                                    No reviews yet for this fabric.
+                                </p>
+                            @endif
+                            {{-- ================= END REVIEWS ================= --}}
+
+
                         <div class="mt-auto">
                             @if (Auth::user()?->role === 'admin')
                                 <div class="flex flex-wrap gap-3 p-4 bg-gray-50 rounded-xl border border-gray-100">

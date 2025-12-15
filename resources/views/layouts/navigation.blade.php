@@ -26,7 +26,7 @@
                     class="text-xs font-bold text-gray-500 hover:text-black transition uppercase tracking-widest">
                     Collections
                 </a>
-                <a href="/reviews"
+                <a href="{{ route ('shop.reviews')}}"
                     class="text-xs font-bold text-gray-500 hover:text-black transition uppercase tracking-widest">
                     Reviews
                 </a>

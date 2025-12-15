@@ -10,6 +10,7 @@ use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\InventoryLogController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ReviewItemController;
+use App\Http\Controllers\ShopReviewController;
 
 Route::get('/', [FabricController::class, 'homepage'])->name('welcome.homepage');
 
@@ -70,7 +71,9 @@ Route::middleware(['auth'])->group(function () {
     // UPDATE review (harus login)
     Route::put('/review-items/{id}', [ReviewItemController::class, 'update'])->name('review.update');
 
-    // Ambil semua review untuk satu produk (bisa dipakai AJAX)
+    //review Shop 
+    Route::get('/shop/reviews', [ShopReviewController::class, 'index'])->name('shop.reviews');
+Route::post('/shop/review', [ShopReviewController::class, 'store'])->name('review.shop.store');
 });
 
 // Halaman Admin

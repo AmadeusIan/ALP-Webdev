@@ -101,11 +101,28 @@ class FabricController extends Controller
         return redirect()->route('fabrics.index')->with('success', 'Fabric added successfully!');
     }
 
-    public function show(Fabric $fabric)
-    {
-        $fabric->load(['category', 'supplier']);
-        return view('fabrics.show', compact('fabric'));
+    public function show(Fabric $fabric){
+        $fabric->load([
+            'category',
+            'supplier',
+            'orderItems.reviewItem'
+        ]);
+
+        $reviews = $fabric->orderItems
+            ->pluck('reviewItem')
+            ->filter(); // buang null
+
+        $averageRating = round($reviews->avg('rating'), 1);
+         $totalReviews = $reviews->count();
+
+        return view('fabrics.show', compact(
+            'fabric',
+            'reviews',
+            'averageRating',
+            'totalReviews'
+        ));
     }
+
 
     public function edit(Fabric $fabric)
     {
@@ -196,4 +213,7 @@ class FabricController extends Controller
         $fabric->delete();
         return redirect()->route('fabrics.index')->with('success', 'Fabric deleted successfully!');
     }
+
+    
+
 }

@@ -12,38 +12,38 @@ class ReviewItemController extends Controller
         // CREATE REVIEW
 
     public function store(Request $request)
-    {
-        $request->validate([
-            'order_item_id' => 'required|exists:order_items,id',
-            'rating' => 'required|integer|min:1|max:5',
-            'comment' => 'nullable|string'
-        ]);
+{
+    $request->validate([
+        'order_item_id' => 'required|exists:order_items,id',
+        'rating' => 'required|integer|min:1|max:5',
+        'comment' => 'nullable|string',
+    ]);
 
-        $item = OrderItem::with('order', 'review')->findOrFail($request->order_item_id);
+    $item = OrderItem::with('order', 'reviewItem')
+        ->findOrFail($request->order_item_id);
 
-        // Validate ownership
-        if ($item->order->user_id !== Auth::id()) {
-            return response()->json(['error' => 'Unauthorized'], 403);
-        }
+    // 1. Ownership check
+    abort_if($item->order->user_id !== Auth::id(), 403);
 
-        // Validate order approved
-        if ($item->order->status !== 'approved') {
-            return response()->json(['error' => 'Order not approved'], 403);
-        }
-
-        // Prevent duplicate review
-        if ($item->reviewItem) {
-            return response()->json(['error' => 'Already reviewed'], 400);
-        }
-
-        $review = ReviewItem::create([
-            'order_item_id' => $item->id,
-            'rating' => $request->rating,
-            'comment' => $request->comment
-        ]);
-
-        return response()->json($review, 201);
+    // 2. Order must be approved
+    if ($item->order->status !== 'approved') {
+        return back()->with('error', 'Order belum disetujui');
     }
+
+    // 3. Prevent double review
+    if ($item->reviewItem) {
+        return back()->with('error', 'Item sudah direview');
+    }
+
+    ReviewItem::create([
+        'order_item_id' => $item->id,
+        'rating' => $request->rating,
+        'comment' => $request->comment,
+    ]);
+
+    return back()->with('success', 'Review berhasil dikirim');
+}
+
 
     
     // UPDATE REVIEW

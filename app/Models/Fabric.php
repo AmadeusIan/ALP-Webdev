@@ -17,4 +17,17 @@ class Fabric extends Model
     public function logs() {
         return $this->hasMany(InventoryLog::class);
     }
+    public function orderItems(){
+        return $this->hasMany(OrderItem::class);
+    }
+    public function reviews(){
+        return $this->hasManyThrough(
+            ReviewItem::class,
+            OrderItem::class,
+            'fabric_id',
+            'order_item_id'
+        );
+    }
+
+
 }

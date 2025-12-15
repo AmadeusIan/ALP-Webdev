@@ -2,6 +2,9 @@
 namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\ReviewItem;
+
+
 
 class OrderItem extends Model
 {
@@ -15,8 +18,7 @@ class OrderItem extends Model
     public function fabric() {
         return $this->belongsTo(Fabric::class);
     }
-
-    public function review(){
+    public function reviewItem(){
         return $this->hasOne(ReviewItem::class);
     }
 

@@ -79,22 +79,88 @@
                                     <td class="py-6 px-6 align-top">
                                         <ul class="space-y-3">
                                             @foreach ($order->items as $item)
-                                                <li class="flex items-start gap-3">
-                                                    <div class="w-8 h-8 bg-stone-200 rounded-none shrink-0 overflow-hidden">
-                                                        @if($item->fabric->image)
-                                                            <img src="{{ asset($item->fabric->image) }}" class="w-full h-full object-cover">
+                                                <li class="flex items-start gap-3 justify-between">
+                                                    <div class="flex items-start gap-3">
+                                                        <div class="w-8 h-8 bg-stone-200 shrink-0 overflow-hidden">
+                                                            @if($item->fabric->image)
+                                                                <img src="{{ asset($item->fabric->image) }}" class="w-full h-full object-cover">
+                                                            @endif
+                                                        </div>
+
+                                                        <div>
+                                                            <span class="block font-serif text-sm text-gray-900 mb-1">
+                                                                {{ $item->fabric->name }}
+                                                            </span>
+                                                            <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                                                                {{ $item->quantity }} Meters
+                                                            </span>
+
+                                                            {{-- ===== REVIEW LOGIC START ===== --}}
+
+                                                        @if ($order->status === 'approved')
+
+                                                            @if ($item->reviewItem)
+
+                                                                <div class="mt-2 text-[10px] text-gray-600">
+                                                                    ⭐ {{ $item->reviewItem->rating }}/5
+                                                                    @if ($item->reviewItem->comment)
+                                                                        <p class="italic mt-1">"{{ $item->reviewItem->comment }}"</p>
+                                                                    @endif
+                                                                </div>
+
+                                                            @else
+
+                                                                <form
+                                                                    method="POST"
+                                                                    action="{{ route('review.store') }}"
+                                                                    class="mt-3 space-y-2"
+                                                                >
+                                                                    @csrf
+
+                                                                    <input type="hidden" name="order_item_id" value="{{ $item->id }}">
+
+                                                                    <select
+                                                                        name="rating"
+                                                                        required
+                                                                        class="border px-2 py-1 text-xs rounded"
+                                                                    >
+                                                                        <option value="">Rating</option>
+                                                                        @for ($i = 1; $i <= 5; $i++)
+                                                                            <option value="{{ $i }}">{{ $i }} ⭐</option>
+                                                                        @endfor
+                                                                    </select>
+
+                                                                    <textarea
+                                                                        name="comment"
+                                                                        class="border w-full p-2 text-xs rounded"
+                                                                        placeholder="Optional review"
+                                                                    ></textarea>
+
+                                                                    <button
+                                                                        type="submit"
+                                                                        class="text-[10px] font-bold uppercase tracking-widest text-black border-b border-black hover:opacity-70"
+                                                                    >
+                                                                        Submit Review
+                                                                    </button>
+                                                                </form>
+
+                                                            @endif
+
+                                                        @else
+
+                                                            <p class="mt-2 text-[10px] text-gray-400 italic">
+                                                                Review available after order is approved
+                                                            </p>
+
                                                         @endif
-                                                    </div>
-                                                    <div>
-                                                        <span class="block font-serif text-sm text-gray-900 leading-none mb-1">
-                                                            {{ $item->fabric->name }}
-                                                        </span>
-                                                        <span class="block font-sans text-[10px] font-bold text-gray-400 uppercase tracking-wider">
-                                                            {{ $item->quantity }} Meters
-                                                        </span>
+
+                                                        {{-- ===== REVIEW LOGIC END ===== --}}
+
+                                                        </div>
                                                     </div>
                                                 </li>
                                             @endforeach
+
                                         </ul>
                                     </td>
 
