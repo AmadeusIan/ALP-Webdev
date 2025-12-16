@@ -1,3 +1,4 @@
+<!-- filepath: resources/views/fabrics/index.blade.php -->
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
@@ -69,13 +70,11 @@
                     <div
                         class="group bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col h-full">
 
+                        <!-- IMAGE SECTION -->
                         <div class="relative h-48 bg-gray-100 flex items-center justify-center overflow-hidden">
-                            <svg class="w-16 h-16 text-gray-300 group-hover:scale-110 transition duration-500"
-                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
-                                </path>
-                            </svg>
+                            <img src="{{ $fabric->getImageUrl() }}"
+                                alt="{{ $fabric->name }}"
+                                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
 
                             <span
                                 class="absolute top-3 left-3 bg-white/90 backdrop-blur text-gray-600 text-xs font-bold px-3 py-1 rounded-full shadow-sm">

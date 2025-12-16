@@ -28,6 +28,12 @@ class Fabric extends Model
             'order_item_id'
         );
     }
+    public function getImageUrl()
+    {
+        return $this->image 
+            ? asset('storage/' . $this->image)
+            : 'https://images.unsplash.com/photo-1620799140408-ed5341cd2431?q=80&w=1000&auto=format&fit=crop';
+    }
 
 
 }

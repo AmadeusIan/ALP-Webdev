@@ -251,6 +251,27 @@
         </div>
     </section>
 
+    <section class="py-32 bg-white" id="portfolio">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-4xl font-bold text-center mb-16">Our Fabric Collection</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            @forelse($fabrics as $fabric)
+                <div class="group cursor-pointer">
+                    <div class="overflow-hidden rounded-lg mb-4">
+                        <img src="{{ $fabric->getImageUrl() }}" 
+                             alt="{{ $fabric->name }}"
+                             class="h-80 w-full object-cover group-hover:scale-105 transition-transform duration-500">
+                    </div>
+                    <h3 class="text-xl font-semibold">{{ $fabric->name }}</h3>
+                    <p class="text-gray-600">{{ $fabric->color }} • {{ $fabric->material }}</p>
+                </div>
+            @empty
+                <p class="text-gray-500">No fabrics available</p>
+            @endforelse
+        </div>
+    </div>
+</section>
+
     <section class="py-32 bg-gray-50" id="location">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
