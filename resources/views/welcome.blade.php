@@ -142,7 +142,7 @@
                 @forelse($fabrics as $fabric)
                     <div class="group relative cursor-pointer">
                         <div class="aspect-w-3 aspect-h-4 w-full overflow-hidden bg-gray-100">
-                            <img src="{{ $fabric->image ? asset($fabric->image) : 'https://images.unsplash.com/photo-1620799140408-ed5341cd2431?q=80&w=1000&auto=format&fit=crop' }}"
+                            <img src="storage/{{ $fabric->image }}"
                                 alt="{{ $fabric->name }}"
                                 class="h-[500px] w-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out">
 
@@ -207,7 +207,7 @@
                 </div>
 
                 <div class="order-1 lg:order-2 grid grid-cols-2 gap-4">
-                    <img src="https://images.unsplash.com/photo-1558597380-4df200877992?q=80&w=800&auto=format&fit=crop"
+                    <img src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?q=80&w=800&auto=format&fit=crop"
                         class="w-full h-80 object-cover mt-12">
                     <img src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?q=80&w=800&auto=format&fit=crop"
                         class="w-full h-80 object-cover">
