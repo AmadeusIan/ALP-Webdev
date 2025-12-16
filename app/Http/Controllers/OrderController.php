@@ -8,6 +8,7 @@ use App\Models\OrderItem;
 use App\Models\Fabric;
 use App\Models\Notification;
 use App\Models\User;
+use App\Models\Venue;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -16,111 +17,122 @@ use PHPUnit\Framework\TestStatus\Notice;
 
 class OrderController extends Controller
 {
-    public function create(Fabric $fabric)
+    public function create(Request $request )
     {
-        return view('orders.create', compact('fabric'));
+        $venues = Venue::with('areas.rooms')->get();
+
+        $fabrics = Fabric::where('stock_meter', '>', 0)->get();
+
+        $selectedVenueId = $request->query('venue_id');
+
+        return view('orders.create', compact('venues', 'fabrics', 'selectedVenueId'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'fabric_id' => 'required|exists:fabrics,id',
-            'quantity' => 'required|numeric|min:1',
             'start_date' => 'required|date|after_or_equal:today',
             'end_date' => 'required|date|after:start_date',
             'note' => 'nullable|string',
+            'add_on_detail' => 'nullable|string',
+
+            'items'      => 'required|array|min:1',
+            'items.*.venue_room_id' => 'required|exists:venue_rooms,id',
+            'items.*.fabric_id'     => 'required|exists:fabrics,id',
+            'items.*.quantity'      => 'required|numeric|min:1',
         ]);
 
-        $fabric = Fabric::findOrFail($request->fabric_id);
-
-        if ($fabric->stock_meter < $request->quantity) {
-            return back()->withErrors(['quantity' => 'Stok tidak cukup! Tersisa: ' . $fabric->stock_meter . 'm']);
-        }
-
         $start = Carbon::parse($request->start_date);
-        $end = Carbon::parse($request->end_date);
-        $days = $start->diffInDays($end) ?: 1;
+        $end   = Carbon::parse($request->end_date);
+        $days  = $start->diffInDays($end) ?: 1;
 
+        try {
+            DB::beginTransaction();
 
-        $subtotal = ($fabric->price_per_meter * $request->quantity) * $days;
-        $grandTotal = $subtotal;
+            $grandTotal = 0;
+            $orderItemsData = [];
 
-        DB::transaction(function () use ($request, $fabric, $days, $grandTotal, $subtotal) {
+            foreach ($request->items as $item) {
+                $fabric = Fabric::find($item['fabric_id']);
+
+                if ($fabric->stock_meter < $item['quantity']) {
+                    return back()->withErrors(['msg' => "Stok kain {$fabric->name} tidak cukup! Tersisa: {$fabric->stock_meter}m"]);
+                }
+
+                $subtotal = $fabric->price_per_meter * $item['quantity'] * $days;
+                $grandTotal += $subtotal;
+
+                $orderItemsData[] = [   
+                    'fabric_id'       => $fabric->id,
+                    'venue_room_id'   => $item['venue_room_id'],
+                    'quantity'        => $item['quantity'],
+                    'price_per_meter' => $fabric->price_per_meter,
+                    'subtotal'        => $subtotal,
+                ];
+            }
 
             $order = Order::create([
-                'user_id' => Auth::id(),
-                'order_number' => 'RNT-' . time(),
-                'start_date' => $request->start_date,
-                'end_date' => $request->end_date,
-                'total_days' => $days,
-                'total_price' => $grandTotal,
-                'status' => 'pending',
-                'note' => $request->note,
+                'user_id'       => Auth::id(),
+                'order_number'  => 'RNT-' . strtoupper(uniqid()),
+                'start_date'    => $request->start_date,
+                'end_date'      => $request->end_date,
+                'total_days'    => $days,
+                'total_price'   => $grandTotal,
+                'status'        => 'pending',
+                'note'          => $request->note,
+                'add_on_detail' => $request->add_on_detail, 
             ]);
 
-            OrderItem::create([
-                'order_id' => $order->id,
-                'fabric_id' => $fabric->id,
-                'quantity' => $request->quantity,
-                'price_per_meter' => $fabric->price_per_meter,
-                'subtotal' => $subtotal,
-            ]);
-
+            foreach ($orderItemsData as $data) {
+                $data['order_id'] = $order->id;
+                OrderItem::create($data);
+            }
 
             Notification::create([
                 'user_id' => $order->user_id,
-                'title' => 'Order Created',
-                'message' => 'Your order #' . $order->order_number . ' has been created and is pending approval.',
-                'type' => 'order_info',
+                'title'   => 'Booking Created',
+                'message' => 'Order #' . $order->order_number . ' created. Waiting for approval.',
+                'type'    => 'order_info',
                 'is_read' => false,
             ]);
 
-            $admins = User::where('role', 'admin')->get();
-            foreach ($admins as $admin) {
-                Notification::create([
-                    'user_id' => $admin->id,
-                    'title' => 'New Order Pending Approval',
-                    'message' => 'User ' . $request->user()->name . ' has created order #' . $order->order_number . ' awaiting your approval.',
-                    'type' => 'order_info',
-                    'is_read' => false,
-                ]);
-            }
+            $this->sendWhatsAppNotifications($order, $grandTotal);
 
+            DB::commit();
 
-            if ($request->user()->phone) {
-                $pesanUser = "Halo Kak *{$request->user()->name}*,\n\n" .
-                    "Terima kasih! Pesanan Anda telah berhasil dibuat. Berikut detailnya:\n\n" .
-                    "*No. Order:* #{$order->order_number}\n" .
-                    "*Total:* Rp " . number_format($grandTotal, 0, ',', '.') . "\n" .
-                    "*Status:* Menunggu Konfirmasi Admin\n\n" .
-                    "Mohon tunggu sebentar ya, Admin kami akan segera mengecek pesanan Anda.\n\n" .
-                    "Terima kasih telah memilih Kana Covers! ";
-
-                FonnteService::send($request->user()->phone, $pesanUser);
-            }
-
-            $admins = User::where('role', 'admin')->get();
-            foreach ($admins as $admin) {
-                if ($admin->phone) {
-                    $pesanAdmin = "🔔*PESANAN BARU MASUK*\n\n" .
-                        "Halo Admin, ada pesanan baru yang perlu diproses:\n\n" .
-                        "*Customer:* {$request->user()->name}\n" .
-                        "*No. Order:* #{$order->order_number}\n" .
-                        "*Total:* Rp " . number_format($grandTotal, 0, ',', '.') . "\n\n" .
-                        "Mohon segera login ke dashboard untuk melakukan konfirmasi. ";
-
-                    FonnteService::send($admin->phone, $pesanAdmin);
-                }
-            }
-
-            // C. Kurangi Stok?
-            // Opsional: Langsung kurangi stok atau tunggu Admin Approve.
-            // Untuk rental, biasanya stok "dibooking" (pending), tapi fisik belum keluar.
-            // Di sini kita TIDAK kurangi stok dulu agar tercatat di Inventory Log nanti saat barang keluar (Admin Approval).
-        });
-
-        return redirect()->route('orders.index')->with('success', 'Booking successful! Waiting for approval.');
+            return redirect()->route('orders.index')->with('success', 'Booking berhasil dibuat! Menunggu konfirmasi admin.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Illuminate\Support\Facades\Log::error($e->getMessage());
+            return back()->withErrors(['msg' => 'Terjadi kesalahan sistem. Silakan coba lagi.']);
+        }
     }
+
+    private function sendWhatsAppNotifications($order, $grandTotal)
+    {
+        if ($order->user->phone) {
+            $pesanUser = "Halo Kak *{$order->user->name}* 👋,\n\n" .
+                "Pesanan Sewa Dekorasi Anda berhasil dibuat!\n" .
+                "📝 *No. Order:* #{$order->order_number}\n" .
+                "💰 *Total:* Rp " . number_format($grandTotal, 0, ',', '.') . "\n" .
+                "⏳ *Status:* Menunggu Konfirmasi Admin\n\n" .
+                "Terima kasih!";
+            FonnteService::send($order->user->phone, $pesanUser);
+        }
+
+        $admins = User::where('role', 'admin')->get();
+        foreach ($admins as $admin) {
+            if ($admin->phone) {
+                $pesanAdmin = "🔔 *ORDER BARU MASUK*\n\n" .
+                    "Customer: {$order->user->name}\n" .
+                    "Order: #{$order->order_number}\n" .
+                    "Total: Rp " . number_format($grandTotal, 0, ',', '.') . "\n\n" .
+                    "Segera cek dashboard untuk approve.";
+                FonnteService::send($admin->phone, $pesanAdmin);
+            }
+        }
+    }
+
 
     public function index()
     {
@@ -128,9 +140,9 @@ class OrderController extends Controller
 
         if ($user->role === 'admin') {
 
-            $orders = Order::with(['user', 'items.fabric'])->latest()->paginate(10);
+            $orders = Order::with(['user', 'items.fabric', 'items.room'])->latest()->paginate(10);
         } else {
-            $orders = Order::with(['items.fabric'])->where('user_id', $user->id)->latest()->paginate(10);
+            $orders = Order::with(['items.fabric', 'items.room'])->where('user_id', $user->id)->latest()->paginate(10);
         }
 
         return view('orders.index', compact('orders'));
@@ -315,8 +327,6 @@ class OrderController extends Controller
                 }
             }
         });
-
-
 
         session()->forget('cart');
         return redirect()->route('orders.index')->with('success', 'Order placed successfully!');

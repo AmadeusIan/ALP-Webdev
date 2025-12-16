@@ -1,167 +1,274 @@
 <x-app-layout>
-    <div class="pt-32 pb-12 bg-gray-50 min-h-screen">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            
+
+    @if ($errors->any())
+        <div class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+            <strong class="font-bold">Whoops! Ada kesalahan input:</strong>
+            <ul class="mt-2 list-disc list-inside text-sm">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+    <div class="pt-32 pb-20 bg-gray-50 min-h-screen">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+
             <div class="mb-10 text-center">
-                <h1 class="font-serif text-3xl font-bold text-gray-900 tracking-wide uppercase">Confirm Reservation</h1>
+                <h1 class="font-serif text-3xl font-bold text-gray-900 uppercase tracking-wide">Create Booking</h1>
                 <div class="w-12 h-0.5 bg-black mx-auto mt-4 mb-2"></div>
-                <p class="text-gray-500 text-sm">Review your booking details below</p>
+                <p class="text-gray-500 text-sm">Select venue and configure your decoration needs</p>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                
-                <div class="lg:col-span-1">
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sticky top-32">
-                        <div class="aspect-w-16 aspect-h-9 w-full overflow-hidden rounded-lg bg-gray-100 mb-6 relative group">
-                             <div class="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-purple-500/10"></div>
-                             <svg class="w-full h-full text-gray-300 p-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                        </div>
+            <form action="{{ route('orders.store') }}" method="POST" id="bookingForm">
+                @csrf
 
-                        <h3 class="font-serif text-xl font-bold text-gray-900 mb-1">{{ $fabric->name }}</h3>
-                        <p class="text-xs font-bold text-indigo-600 uppercase tracking-wider mb-4">{{ $fabric->category->name }}</p>
-                        
-                        <div class="flex justify-between items-center border-t border-gray-100 pt-4">
-                            <span class="text-sm text-gray-500">Price / Meter / Day</span>
-                            <span class="font-bold text-gray-900">Rp {{ number_format($fabric->price_per_meter, 0, ',', '.') }}</span>
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-8 mb-8">
+                    <h3 class="font-serif text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+                        <span
+                            class="w-6 h-6 rounded-full bg-black text-white flex items-center justify-center text-xs">1</span>
+                        Time & Location
+                    </h3>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Start
+                                Date</label>
+                            <input type="date" name="start_date" id="start_date" required min="{{ date('Y-m-d') }}"
+                                class="w-full rounded-lg border-gray-300 focus:border-black focus:ring-black transition">
                         </div>
-                        <div class="flex justify-between items-center mt-2">
-                            <span class="text-sm text-gray-500">Stock Available</span>
-                            <span class="font-bold text-green-600">{{ $fabric->stock_meter }} meters</span>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">End
+                                Date</label>
+                            <input type="date" name="end_date" id="end_date" required min="{{ date('Y-m-d') }}"
+                                class="w-full rounded-lg border-gray-300 focus:border-black focus:ring-black transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Select
+                                Venue</label>
+                            <select id="venueSelect"
+                                class="w-full rounded-lg border-gray-300 focus:border-black focus:ring-black transition font-bold text-gray-900">
+                                <option value="" selected disabled>-- Choose Hotel/Place --</option>
+                                @foreach ($venues as $venue)
+                                    <option value="{{ $venue->id }}">{{ $venue->name }}</option>
+                                @endforeach
+                            </select>
                         </div>
                     </div>
                 </div>
 
-                <div class="lg:col-span-2">
-                    <div class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
-                        <div class="p-8">
-                            <form action="{{ route('orders.store') }}" method="POST" id="bookingForm">
-                                @csrf
-                                <input type="hidden" name="fabric_id" value="{{ $fabric->id }}">
-                                <input type="hidden" id="pricePerMeter" value="{{ $fabric->price_per_meter }}">
+                <div id="areaSection"
+                    class="hidden bg-white rounded-xl shadow-sm border border-gray-100 p-8 mb-8 transition-all duration-500">
+                    <h3 class="font-serif text-lg font-bold text-gray-900 mb-2 flex items-center gap-2">
+                        <span
+                            class="w-6 h-6 rounded-full bg-black text-white flex items-center justify-center text-xs">2</span>
+                        Configure Areas
+                    </h3>
+                    <p class="text-sm text-gray-500 mb-6 ml-8">Check the areas you want to decorate, then select the
+                        specific room and fabric.</p>
 
-                                <div class="mb-8">
-                                    <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Rental Period</h4>
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
-                                            <input type="date" name="start_date" id="start_date" required
-                                                min="{{ date('Y-m-d') }}"
-                                                class="w-full rounded-lg border-gray-300 shadow-sm focus:border-black focus:ring-black transition">
-                                            @error('start_date') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
-                                        </div>
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
-                                            <input type="date" name="end_date" id="end_date" required
-                                                class="w-full rounded-lg border-gray-300 shadow-sm focus:border-black focus:ring-black transition">
-                                            @error('end_date') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
-                                        </div>
-                                    </div>
-                                </div>
+                    <div id="dynamicAreaList" class="space-y-6"></div>
+                </div>
 
-                                <div class="mb-8">
-                                    <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Fabric Details</h4>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Quantity Needed (Meters)</label>
-                                        <input type="number" name="quantity" id="quantity" value="1" min="1" max="{{ $fabric->stock_meter }}" required
-                                            class="w-full md:w-1/3 rounded-lg border-gray-300 shadow-sm focus:border-black focus:ring-black transition font-bold text-lg">
-                                        @error('quantity') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
-                                    </div>
-                                </div>
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-8 mb-8">
+                    <h3 class="font-serif text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <span
+                            class="w-6 h-6 rounded-full bg-black text-white flex items-center justify-center text-xs">3</span>
+                        Additional Info
+                    </h3>
 
-                                <div class="mb-8">
-                                    <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Additional Info</h4>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Notes (Optional)</label>
-                                    <textarea name="note" rows="3" placeholder="Special request for packaging, delivery instructions, etc."
-                                        class="w-full rounded-lg border-gray-300 shadow-sm focus:border-black focus:ring-black transition"></textarea>
-                                </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Add-on Details
+                            (Optional)</label>
+                        <textarea name="add_on_detail" rows="3"
+                            placeholder="E.g., Tambahan bunga di meja penerima tamu, lighting tambahan..."
+                            class="w-full rounded-lg border-gray-300 focus:border-black focus:ring-black transition"></textarea>
+                    </div>
 
-                                <div class="bg-gray-50 p-6 rounded-lg border border-gray-200 mb-8">
-                                    <div class="flex justify-between items-center mb-2">
-                                        <span class="text-gray-600 text-sm">Rental Duration</span>
-                                        <span class="font-bold text-gray-900" id="totalDays">1 Day</span>
-                                    </div>
-                                    <div class="flex justify-between items-center mb-4">
-                                        <span class="text-gray-600 text-sm">Quantity</span>
-                                        <span class="font-bold text-gray-900"><span id="displayQty">1</span> Meters</span>
-                                    </div>
-                                    <div class="border-t border-gray-200 pt-4 flex justify-between items-center">
-                                        <span class="text-lg font-serif font-bold text-gray-900">Estimated Total</span>
-                                        <span class="text-2xl font-bold text-indigo-600" id="grandTotal">Rp 0</span>
-                                    </div>
-                                </div>
+                    <div class="mt-4">
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">General Note
+                            (Optional)</label>
+                        <textarea name="note" rows="2" placeholder="Special instructions for the team..."
+                            class="w-full rounded-lg border-gray-300 focus:border-black focus:ring-black transition"></textarea>
+                    </div>
+                </div>
 
-                                <div class="flex gap-4">
-                                    <a href="{{ route('fabrics.show', $fabric) }}" 
-                                       class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 font-bold hover:bg-gray-50 transition text-center">
-                                        Cancel
-                                    </a>
-                                    <button type="submit" 
-                                        class="flex-1 bg-black text-white px-6 py-3 rounded-lg font-bold hover:bg-gray-800 transition shadow-lg flex justify-center items-center gap-2">
-                                        <span>Confirm Booking</span>
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
-                                    </button>
-                                </div>
-
-                            </form>
+                <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 md:px-8 shadow-lg z-50">
+                    <div class="max-w-5xl mx-auto flex justify-between items-center">
+                        <div class="hidden md:block">
+                            <p class="text-xs text-gray-400 uppercase">Booking Status</p>
+                            <p class="font-bold text-gray-900">Drafting...</p>
+                        </div>
+                        <div class="flex gap-4 w-full md:w-auto">
+                            <a href="{{ route('orders.index') }}"
+                                class="px-6 py-3 border border-gray-300 rounded-lg font-bold text-gray-600 hover:bg-gray-50 w-full md:w-auto text-center">
+                                Cancel
+                            </a>
+                            <button type="submit"
+                                class="px-8 py-3 bg-black text-white rounded-lg font-bold hover:bg-gray-800 transition shadow-lg w-full md:w-auto flex items-center justify-center gap-2">
+                                <span>Create Booking</span>
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                                </svg>
+                            </button>
                         </div>
                     </div>
                 </div>
-            </div>
+                <div class="h-20"></div>
+
+            </form>
         </div>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const startDateInput = document.getElementById('start_date');
-            const endDateInput = document.getElementById('end_date');
-            const quantityInput = document.getElementById('quantity');
-            const pricePerMeter = parseInt(document.getElementById('pricePerMeter').value);
-            
-            const totalDaysEl = document.getElementById('totalDays');
-            const displayQtyEl = document.getElementById('displayQty');
-            const grandTotalEl = document.getElementById('grandTotal');
+        // 1. Terima Data dari Controller (Venues & Fabrics)
+        const venuesData = @json($venues);
+        const fabricsData = @json($fabrics);
+        const selectedVenueId = "{{ $selectedVenueId ?? '' }}";
+        const venueSelect = document.getElementById('venueSelect');
+        const areaSection = document.getElementById('areaSection');
+        const dynamicAreaList = document.getElementById('dynamicAreaList');
 
-            function calculateTotal() {
-                const start = new Date(startDateInput.value);
-                const end = new Date(endDateInput.value);
-                const qty = parseInt(quantityInput.value) || 1;
+        if (selectedVenueId) {
+            // 1. Isi Dropdown secara otomatis
+            venueSelect.value = selectedVenueId;
 
-                // Update Quantity Display
-                displayQtyEl.innerText = qty;
+            // 3. Trigger event change secara otomatis
+            // Kita menggunakan setTimeout sedikit agar DOM punya waktu untuk render
+            setTimeout(() => {
+                venueSelect.dispatchEvent(new Event('change'));
+            }, 50);
+        }
 
-                if (startDateInput.value && endDateInput.value && start <= end) {
-                    // Hitung selisih hari
-                    const diffTime = Math.abs(end - start);
-                    let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
-                    
-                    // Jika hari sama (rental 1 hari), hitung 1 hari
-                    if (diffDays === 0) diffDays = 1;
+        // 2. Event Listener saat Venue dipilih
+        venueSelect.addEventListener('change', function() {
+            const selectedVenueId = this.value;
+            const venue = venuesData.find(v => v.id == selectedVenueId);
 
-                    totalDaysEl.innerText = diffDays + (diffDays === 1 ? ' Day' : ' Days');
+            // Reset List
+            dynamicAreaList.innerHTML = '';
 
-                    // Rumus: Harga x Meter x Hari
-                    const total = pricePerMeter * qty * diffDays;
-                    
-                    // Format Rupiah
-                    grandTotalEl.innerText = 'Rp ' + total.toLocaleString('id-ID');
-                } else {
-                    totalDaysEl.innerText = '-';
-                    grandTotalEl.innerText = 'Rp 0';
-                }
+            if (venue && venue.areas.length > 0) {
+                areaSection.classList.remove('hidden');
+
+                // Loop setiap Area (Ballroom, Meeting Room, dll)
+                venue.areas.forEach((area, index) => {
+                    const areaCard = createAreaCard(area, index);
+                    dynamicAreaList.appendChild(areaCard);
+                });
+            } else {
+                areaSection.classList.add('hidden');
+                alert('No areas configuration found for this venue.');
             }
-
-            // Pasang event listener
-            startDateInput.addEventListener('change', calculateTotal);
-            endDateInput.addEventListener('change', calculateTotal);
-            quantityInput.addEventListener('input', calculateTotal);
-            
-            // Set default date to today for UX
-            const today = new Date().toISOString().split('T')[0];
-            startDateInput.value = today;
-            endDateInput.min = today; 
-            
-            // Trigger perhitungan awal
-            calculateTotal();
         });
+
+        // 3. Fungsi Membuat HTML per Area (Checkbox + Hidden Inputs)
+        function createAreaCard(area, index) {
+            const wrapper = document.createElement('div');
+            wrapper.className = "border border-gray-200 rounded-lg p-4 hover:border-black transition bg-gray-50/50";
+
+            // Header: Checkbox & Nama Area
+            const header = document.createElement('div');
+            header.className = "flex items-center gap-3 mb-2 cursor-pointer";
+
+            const checkbox = document.createElement('input');
+            checkbox.type = "checkbox";
+            checkbox.id = `area_check_${area.id}`;
+            checkbox.className = "w-5 h-5 text-black border-gray-300 rounded focus:ring-black";
+
+            const label = document.createElement('label');
+            label.htmlFor = `area_check_${area.id}`;
+            label.className = "font-bold text-gray-900 cursor-pointer select-none";
+            label.innerText = area.name; // e.g., "Grand Ballroom"
+
+            header.appendChild(checkbox);
+            header.appendChild(label);
+            wrapper.appendChild(header);
+
+            // Content: Dropdown Room & Fabric (Hidden by default)
+            const content = document.createElement('div');
+            content.id = `content_area_${area.id}`;
+            content.className = "hidden mt-4 pl-8 grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-gray-200 pt-4";
+
+            // A. Dropdown Specific Room (e.g., Ballroom 1, Ballroom 2)
+            const roomDiv = document.createElement('div');
+            roomDiv.innerHTML =
+                `<label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Select Room</label>`;
+            const roomSelect = document.createElement('select');
+            roomSelect.name = `items[${index}][venue_room_id]`; // Name Array Index
+            roomSelect.className = "w-full text-sm rounded-md border-gray-300 focus:border-black focus:ring-black";
+            roomSelect.disabled = true; // Disabled biar gak ke-submit kalau gak dicentang
+
+            // Isi opsi Room
+            area.rooms.forEach(room => {
+                const opt = document.createElement('option');
+                opt.value = room.id;
+                opt.innerText = room.name;
+                roomSelect.appendChild(opt);
+            });
+            roomDiv.appendChild(roomSelect);
+
+            // B. Dropdown Fabric (Kain)
+            const fabricDiv = document.createElement('div');
+            fabricDiv.innerHTML =
+                `<label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Select Fabric</label>`;
+            const fabricSelect = document.createElement('select');
+            fabricSelect.name = `items[${index}][fabric_id]`;
+            fabricSelect.className = "w-full text-sm rounded-md border-gray-300 focus:border-black focus:ring-black";
+            fabricSelect.disabled = true;
+
+            fabricsData.forEach(fabric => {
+                const opt = document.createElement('option');
+                opt.value = fabric.id;
+                // Format: Nama Kain - Warna (Sisa Stok)
+                opt.innerText = `${fabric.name} - ${fabric.color} (Stock: ${fabric.stock_meter}m)`;
+                fabricSelect.appendChild(opt);
+            });
+            fabricDiv.appendChild(fabricSelect);
+
+            // C. Input Quantity
+            const qtyDiv = document.createElement('div');
+            qtyDiv.innerHTML =
+                `<label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Quantity (Meters)</label>`;
+            const qtyInput = document.createElement('input');
+            qtyInput.type = "number";
+            qtyInput.name = `items[${index}][quantity]`;
+            qtyInput.value = 1;
+            qtyInput.min = 1;
+            qtyInput.className = "w-full text-sm rounded-md border-gray-300 focus:border-black focus:ring-black";
+            qtyInput.disabled = true;
+            qtyDiv.appendChild(qtyInput);
+
+            // Gabungkan Input ke Content
+            content.appendChild(roomDiv);
+            content.appendChild(fabricDiv);
+            content.appendChild(qtyDiv);
+            wrapper.appendChild(content);
+
+            // 4. Logika Toggle Checkbox
+            checkbox.addEventListener('change', function() {
+                if (this.checked) {
+                    content.classList.remove('hidden');
+                    wrapper.classList.add('border-black', 'bg-white', 'shadow-md');
+                    wrapper.classList.remove('border-gray-200', 'bg-gray-50/50');
+
+                    // Aktifkan Input agar terkirim ke server
+                    roomSelect.disabled = false;
+                    fabricSelect.disabled = false;
+                    qtyInput.disabled = false;
+                } else {
+                    content.classList.add('hidden');
+                    wrapper.classList.remove('border-black', 'bg-white', 'shadow-md');
+                    wrapper.classList.add('border-gray-200', 'bg-gray-50/50');
+
+                    // Matikan Input agar TIDAK terkirim
+                    roomSelect.disabled = true;
+                    fabricSelect.disabled = true;
+                    qtyInput.disabled = true;
+                }
+            });
+
+            return wrapper;
+        }
     </script>
 </x-app-layout>

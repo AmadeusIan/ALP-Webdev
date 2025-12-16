@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Http\Controllers;
+
 use App\Models\MeetingRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -31,7 +33,7 @@ class MeetingController extends Controller
         ]);
 
         return redirect()->route('meeting-request.create')
-                         ->with('success', 'Meeting request submitted successfully!');
+            ->with('success', 'Meeting request submitted successfully!');
     }
 
     // ADMIN PAGE
@@ -42,20 +44,19 @@ class MeetingController extends Controller
     }
 
     // ADMIN PAGE
-public function accept(MeetingRequest $meeting)
-{
-    $meeting->status = 'approved';
-    $meeting->save();
+    public function accept(MeetingRequest $meeting)
+    {
+        $meeting->status = 'approved';
+        $meeting->save();
 
-    return back();
-}
+        return back();
+    }
 
-public function reject(MeetingRequest $meeting)
-{
-    $meeting->status = 'rejected';
-    $meeting->save();
+    public function reject(MeetingRequest $meeting)
+    {
+        $meeting->status = 'rejected';
+        $meeting->save();
 
-    return back();
-}
-
+        return back();
+    }
 }

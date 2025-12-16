@@ -9,6 +9,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\InventoryLogController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\VenueController;
 
 Route::get('/', [FabricController::class, 'homepage'])->name('welcome.homepage');
 
@@ -33,11 +34,11 @@ Route::middleware(['auth'])->group(function () {
     //order
 
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
-    Route::get('/fabrics/{fabric}/book', [OrderController::class, 'create'])->name('orders.create');
-    Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+    Route::get('/booking', [OrderController::class, 'create'])->name('orders.create');
     Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
-    Route::patch('/orders/{order}/update-price', [OrderController::class, 'updatePrice'])->name('orders.updatePrice');
 
+    Route::patch('/orders/{order}/update-price', [OrderController::class, 'updatePrice'])->name('orders.updatePrice');
+    Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
 
     //cart
 
@@ -59,6 +60,8 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
     Route::patch('/notifications/read-all', [NotificationController::class, 'markAllasRead'])->name('notifications.markAllAsRead');
     Route::delete('/notifications/{id}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
+
+    Route::get('/venues', [VenueController::class, 'index'])->name('venues.index');
 });
 
 // Halaman Admin
@@ -76,13 +79,7 @@ Route::middleware(['auth', 'is_admin'])->group(function () {
     Route::get('/fabrics/{fabric}/restock', [FabricController::class, 'editStock'])->name('fabrics.restock');
     Route::post('/fabrics/{fabric}/stock', [FabricController::class, 'updateStock'])->name('fabrics.updateStock');
 
-
-
-
     Route::get('/inventory-logs', [InventoryLogController::class, 'index'])->name('inventory_logs.index');
-
-
-
 
     Route::patch('/orders/{order}/approve', [OrderController::class, 'approve'])->name('orders.approve');
     Route::patch('/orders/{order}/reject', [OrderController::class, 'reject'])->name('orders.reject');

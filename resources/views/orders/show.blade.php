@@ -6,33 +6,43 @@
                 <div>
                     <div class="flex items-center gap-3">
                         <a href="{{ route('orders.index') }}" class="text-gray-400 hover:text-gray-600 transition">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                            </svg>
                         </a>
                         <h1 class="font-serif text-3xl font-bold text-gray-900 uppercase tracking-wide">
                             Order #{{ $order->order_number }}
                         </h1>
                     </div>
-                    <p class="text-gray-500 text-sm mt-1 ml-9">Created on {{ $order->created_at->format('d M Y, H:i') }}</p>
+                    <p class="text-gray-500 text-sm mt-1 ml-9">Created on {{ $order->created_at->format('d M Y, H:i') }}
+                    </p>
                 </div>
 
                 <div class="flex items-center gap-3">
-                    <span class="px-4 py-2 rounded-full text-sm font-bold uppercase tracking-wider
-                        {{ $order->status === 'approved' ? 'bg-green-100 text-green-700' : 
-                          ($order->status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700') }}">
+                    <span
+                        class="px-4 py-2 rounded-full text-sm font-bold uppercase tracking-wider
+                        {{ $order->status === 'approved'
+                            ? 'bg-green-100 text-green-700'
+                            : ($order->status === 'rejected'
+                                ? 'bg-red-100 text-red-700'
+                                : 'bg-yellow-100 text-yellow-700') }}">
                         {{ $order->status }}
                     </span>
-                    
-                    @if($order->status === 'pending' && Auth::user()->role === 'admin')
+
+                    @if ($order->status === 'pending' && Auth::user()->role === 'admin')
                         <div class="flex gap-2">
                             <form action="{{ route('orders.approve', $order->id) }}" method="POST">
                                 @csrf @method('PATCH')
-                                <button type="submit" class="bg-black text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-gray-800 transition">
+                                <button type="submit"
+                                    class="bg-black text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-gray-800 transition">
                                     Approve
                                 </button>
                             </form>
                             <form action="{{ route('orders.reject', $order->id) }}" method="POST">
                                 @csrf @method('PATCH')
-                                <button type="submit" class="bg-white border border-gray-300 text-red-600 px-4 py-2 rounded-lg text-sm font-bold hover:bg-red-50 transition">
+                                <button type="submit"
+                                    class="bg-white border border-gray-300 text-red-600 px-4 py-2 rounded-lg text-sm font-bold hover:bg-red-50 transition">
                                     Reject
                                 </button>
                             </form>
@@ -42,19 +52,24 @@
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                
+
                 <div class="lg:col-span-2">
                     <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                         <div class="p-6 border-b border-gray-100 flex justify-between items-center">
                             <h3 class="font-serif text-lg font-bold text-gray-900">Order Items</h3>
-                            
-                            @if($order->status === 'pending')
+
+                            @if ($order->status === 'pending')
                                 <span class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded">
                                     Editing Enabled
                                 </span>
                             @else
-                                <span class="text-xs font-bold text-gray-500 bg-gray-100 px-2 py-1 rounded flex items-center gap-1">
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                                <span
+                                    class="text-xs font-bold text-gray-500 bg-gray-100 px-2 py-1 rounded flex items-center gap-1">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
+                                        </path>
+                                    </svg>
                                     Price Locked
                                 </span>
                             @endif
@@ -76,16 +91,24 @@
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-gray-100">
-                                        @foreach($order->items as $item)
+                                        @foreach ($order->items as $item)
                                             <tr class="hover:bg-gray-50 transition">
                                                 <td class="px-6 py-4">
                                                     <div class="flex items-center gap-3">
                                                         <div class="w-10 h-10 bg-gray-200 rounded-md overflow-hidden">
-                                                            <svg class="w-full h-full text-gray-400 p-2" fill="currentColor" viewBox="0 0 20 20"><path d="M4 3a2 2 0 100 4h12a2 2 0 100-4H4z" /><path fill-rule="evenodd" d="M3 8h14v7a2 2 0 01-2 2H5a2 2 0 01-2-2V8zm5 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" clip-rule="evenodd" /></svg>
+                                                            <svg class="w-full h-full text-gray-400 p-2"
+                                                                fill="currentColor" viewBox="0 0 20 20">
+                                                                <path d="M4 3a2 2 0 100 4h12a2 2 0 100-4H4z" />
+                                                                <path fill-rule="evenodd"
+                                                                    d="M3 8h14v7a2 2 0 01-2 2H5a2 2 0 01-2-2V8zm5 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z"
+                                                                    clip-rule="evenodd" />
+                                                            </svg>
                                                         </div>
                                                         <div>
-                                                            <p class="font-bold text-gray-900 text-sm">{{ $item->fabric->name }}</p>
-                                                            <p class="text-xs text-gray-500">{{ $item->fabric->category->name ?? 'Fabric' }}</p>
+                                                            <p class="font-bold text-gray-900 text-sm">
+                                                                {{ $item->fabric->name }}</p>
+                                                            <p class="text-xs text-gray-500">
+                                                                {{ $item->fabric->category->name ?? 'Fabric' }}</p>
                                                         </div>
                                                     </div>
                                                 </td>
@@ -96,14 +119,14 @@
                                                     {{ $order->total_days }} Days
                                                 </td>
                                                 <td class="px-6 py-4 text-right">
-                                                    @if($order->status === 'pending')
+                                                    @if ($order->status === 'pending' && Auth::user()->role==='admin')
                                                         <div class="flex items-center justify-end gap-2">
                                                             <span class="text-gray-400 text-xs">Rp</span>
-                                                            <input type="number" 
-                                                                   name="items[{{ $item->id }}][price_per_meter]" 
-                                                                   value="{{ $item->price_per_meter }}" 
-                                                                   class="w-24 text-right text-sm border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-1"
-                                                                   min="0">
+                                                            <input type="number"
+                                                                name="items[{{ $item->id }}][price_per_meter]"
+                                                                value="{{ $item->price_per_meter }}"
+                                                                class="w-24 text-right text-sm border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-1"
+                                                                min="0">
                                                         </div>
                                                     @else
                                                         <span class="font-medium text-gray-900">
@@ -120,13 +143,17 @@
                                 </table>
                             </div>
 
-                            @if($order->status === 'pending')
-                                <div class="bg-gray-50 px-6 py-4 flex justify-between items-center border-t border-gray-100">
-                                    <p class="text-xs text-gray-500 italic">Changing price will auto-recalculate the Grand Total.</p>
-                                    <button type="submit" class="bg-indigo-600 text-white px-6 py-2 rounded-lg text-sm font-bold hover:bg-indigo-700 shadow-md transition">
+                            @if ($order->status === 'pending' && Auth::user()->role==='admin')
+                                <div
+                                    class="bg-gray-50 px-6 py-4 flex justify-between items-center border-t border-gray-100">
+                                    <p class="text-xs text-gray-500 italic">Changing price will auto-recalculate the
+                                        Grand Total.</p>
+                                    <button type="submit"
+                                        class="bg-indigo-600 text-white px-6 py-2 rounded-lg text-sm font-bold hover:bg-indigo-700 shadow-md transition">
                                         Save Price Changes
                                     </button>
                                 </div>
+                                @else
                             @endif
                         </form>
                     </div>
@@ -140,11 +167,12 @@
                 </div>
 
                 <div class="lg:col-span-1 space-y-6">
-                    
+
                     <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                         <h3 class="font-serif text-lg font-bold text-gray-900 mb-4">Customer Details</h3>
                         <div class="flex items-center gap-4 mb-4">
-                            <div class="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center font-bold text-xl">
+                            <div
+                                class="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center font-bold text-xl">
                                 {{ substr($order->user->name, 0, 1) }}
                             </div>
                             <div>
@@ -159,13 +187,15 @@
                             </div>
                             <div class="flex justify-between text-sm">
                                 <span class="text-gray-500">Member Since</span>
-                                <span class="font-medium text-gray-900">{{ $order->user->created_at->format('M Y') }}</span>
+                                <span
+                                    class="font-medium text-gray-900">{{ $order->user->created_at->format('M Y') }}</span>
                             </div>
                         </div>
-                        
-                        @if($order->user->phone)
-                            <a href="https://wa.me/{{ preg_replace('/^0/', '62', $order->user->phone) }}" target="_blank"
-                               class="mt-6 block w-full text-center bg-green-50 text-green-700 border border-green-200 py-2 rounded-lg font-bold text-sm hover:bg-green-100 transition">
+
+                        @if ($order->user->phone)
+                            <a href="https://wa.me/{{ preg_replace('/^0/', '62', $order->user->phone) }}"
+                                target="_blank"
+                                class="mt-6 block w-full text-center bg-green-50 text-green-700 border border-green-200 py-2 rounded-lg font-bold text-sm hover:bg-green-100 transition">
                                 Chat Customer
                             </a>
                         @endif
@@ -173,15 +203,17 @@
 
                     <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                         <h3 class="font-serif text-lg font-bold text-gray-900 mb-4">Rental Summary</h3>
-                        
+
                         <div class="space-y-3 text-sm border-b border-gray-100 pb-4 mb-4">
                             <div class="flex justify-between">
                                 <span class="text-gray-500">Start Date</span>
-                                <span class="font-medium text-gray-900">{{ \Carbon\Carbon::parse($order->start_date)->format('d M Y') }}</span>
+                                <span
+                                    class="font-medium text-gray-900">{{ \Carbon\Carbon::parse($order->start_date)->format('d M Y') }}</span>
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-gray-500">End Date</span>
-                                <span class="font-medium text-gray-900">{{ \Carbon\Carbon::parse($order->end_date)->format('d M Y') }}</span>
+                                <span
+                                    class="font-medium text-gray-900">{{ \Carbon\Carbon::parse($order->end_date)->format('d M Y') }}</span>
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-gray-500">Duration</span>
