@@ -39,6 +39,7 @@ use App\Http\Controllers\CalendarController;
 
 Route::get('/events', [CalendarController::class, 'apiAllEvents']);
 Route::get('/events/{user}', [CalendarController::class, 'apiEventsByUser']);
+Route::get('events-approved', [CalendarController::class, 'apiAllEvents']);
 
 
 

@@ -1,6 +1,5 @@
-@extends('layouts.app')
-
-@section('content')
+<x-app-layout>
+    <x-slot name="header">
 <div class="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow-lg">
     <h2 class="text-2xl font-semibold text-gray-800 mb-6 text-center">Request Meeting</h2>
 
@@ -52,4 +51,5 @@
         </button>
     </form>
 </div>
-@endsection
+</x-slot>
+</x-app-layout>

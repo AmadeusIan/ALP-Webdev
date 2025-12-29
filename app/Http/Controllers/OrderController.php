@@ -165,6 +165,20 @@ class OrderController extends Controller
         return view('orders.index', compact('orders'));
     }
 
+    public function show($id)
+{
+    $order = Order::where('id', $id)
+        ->where('user_id', Auth::id())
+        ->with([
+            'items.fabric',
+            'items.reviewItem'
+        ])
+        ->firstOrFail();
+
+    return view('orders.show', compact('order'));
+}
+
+
 
     public function show(Order $order)
     {

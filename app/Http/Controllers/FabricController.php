@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-
+use Illuminate\Support\Facades\Storage;
 
 use App\Models\Fabric;
 use App\Models\Supplier;
@@ -49,7 +49,6 @@ class FabricController extends Controller
             $query->where('name', 'like', '%' . $request->search . '%');
         }
 
-
         if ($request->has('category_id') && $request->category_id != '') {
             $query->where('category_id', $request->category_id);
         }
@@ -92,8 +91,15 @@ class FabricController extends Controller
             'material' => 'nullable|string',
             'price_per_meter' => 'required|numeric',
             'stock_meter' => 'required|numeric|min:0',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'description' => 'nullable|string'
         ]);
+
+        // Handle upload gambar
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('fabrics', 'public');
+            $validated['image'] = $imagePath;
+        }
 
         $fabric = DB::transaction(function () use ($validated) {
 
@@ -121,6 +127,26 @@ class FabricController extends Controller
             ->get();
 
         return view('fabrics.show', compact('fabric', 'variants'));
+    public function show(Fabric $fabric){
+        $fabric->load([
+            'category',
+            'supplier',
+            'orderItems.reviewItem'
+        ]);
+
+        $reviews = $fabric->orderItems
+            ->pluck('reviewItem')
+            ->filter();
+
+        $averageRating = round($reviews->avg('rating'), 1);
+        $totalReviews = $reviews->count();
+
+        return view('fabrics.show', compact(
+            'fabric',
+            'reviews',
+            'averageRating',
+            'totalReviews'
+        ));
     }
 
     public function edit(Fabric $fabric)
@@ -135,7 +161,6 @@ class FabricController extends Controller
         return view('fabrics.restock', compact('fabric'));
     }
 
-
     public function update(Request $request, Fabric $fabric)
     {
         $validated = $request->validate([
@@ -145,8 +170,18 @@ class FabricController extends Controller
             'color' => 'nullable|string',
             'material' => 'nullable|string',
             'price_per_meter' => 'required|numeric',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'description' => 'nullable|string'
         ]);
+
+        // Handle update gambar
+        if ($request->hasFile('image')) {
+            if ($fabric->image) {
+                Storage::disk('public')->delete($fabric->image);
+            }
+            $imagePath = $request->file('image')->store('fabrics', 'public');
+            $validated['image'] = $imagePath;
+        }
 
         $fabric->update($validated);
 
@@ -154,11 +189,10 @@ class FabricController extends Controller
     }
 
     public function updateStock(Request $request, $id)
-
     {
         $request->validate([
-            'change_type' => 'required|in:restock,adjustment,damage', // Jenis perubahan
-            'change_amount' => 'required|numeric', // Bisa minus jika barang rusak
+            'change_type' => 'required|in:restock,adjustment,damage',
+            'change_amount' => 'required|numeric',
             'note' => 'nullable|string'
         ]);
 
@@ -167,15 +201,11 @@ class FabricController extends Controller
         DB::transaction(function () use ($fabric, $request) {
             $input = $request->change_amount;
             $type = $request->change_type;
-
             $currentStock = $fabric->stock_meter;
-
             $logAmount = 0;
-            $newstock = 0;
 
             if ($type === 'adjustment') {
                 $logAmount = $input - $fabric->stock_meter;
-
                 $fabric->stock_meter = $input;
             } else {
                 if ($type === 'restock') {
@@ -204,11 +234,15 @@ class FabricController extends Controller
                 'note' => $request->note
             ]);
         });
+
         return redirect()->route('fabrics.show', $fabric)->with('success', 'Stock updated successfully!');
     }
 
     public function destroy(Fabric $fabric)
     {
+        if ($fabric->image) {
+            Storage::disk('public')->delete($fabric->image);
+        }
         $fabric->delete();
         return redirect()->route('fabrics.index')->with('success', 'Fabric deleted successfully!');
     }
