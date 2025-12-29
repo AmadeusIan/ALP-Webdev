@@ -17,7 +17,7 @@ use PHPUnit\Framework\TestStatus\Notice;
 
 class OrderController extends Controller
 {
-    public function create(Request $request )
+    public function create(Request $request)
     {
         $venues = Venue::with('areas.rooms')->get();
 
@@ -30,6 +30,7 @@ class OrderController extends Controller
 
     public function store(Request $request)
     {
+
         $request->validate([
             'start_date' => 'required|date|after_or_equal:today',
             'end_date' => 'required|date|after:start_date',
@@ -39,33 +40,44 @@ class OrderController extends Controller
             'items'      => 'required|array|min:1',
             'items.*.venue_room_id' => 'required|exists:venue_rooms,id',
             'items.*.fabric_id'     => 'required|exists:fabrics,id',
-            'items.*.quantity'      => 'required|numeric|min:1',
+            'items.*.quantity'      => 'required|integer|min:1',
         ]);
 
-        $start = Carbon::parse($request->start_date);
-        $end   = Carbon::parse($request->end_date);
-        $days  = $start->diffInDays($end) ?: 1;
+        $startDate = Carbon::parse($request->start_date);
+        $endDate   = Carbon::parse($request->end_date);
+        $days      = $startDate->diffInDays($endDate) + 1;
 
+
+        DB::beginTransaction();
         try {
-            DB::beginTransaction();
 
             $grandTotal = 0;
             $orderItemsData = [];
 
             foreach ($request->items as $item) {
-                $fabric = Fabric::find($item['fabric_id']);
+                $fabric = Fabric::where('id', $item['fabric_id'])->lockForUpdate()->first();
+
+
+                if (!$fabric) {
+                    DB::rollBack();
+                    return back()->withErrors(['msg' => "Kain dengan ID {$item['fabric_id']} tidak ditemukan."]);
+                }
 
                 if ($fabric->stock_meter < $item['quantity']) {
+                    DB::rollBack();
                     return back()->withErrors(['msg' => "Stok kain {$fabric->name} tidak cukup! Tersisa: {$fabric->stock_meter}m"]);
                 }
+
+                $fabric->decrement('stock_meter', $item['quantity']);
 
                 $subtotal = $fabric->price_per_meter * $item['quantity'] * $days;
                 $grandTotal += $subtotal;
 
-                $orderItemsData[] = [   
+                $orderItemsData[] = [
                     'fabric_id'       => $fabric->id,
                     'venue_room_id'   => $item['venue_room_id'],
                     'quantity'        => $item['quantity'],
+                    'colors'          => $fabric->color,
                     'price_per_meter' => $fabric->price_per_meter,
                     'subtotal'        => $subtotal,
                 ];
@@ -80,7 +92,7 @@ class OrderController extends Controller
                 'total_price'   => $grandTotal,
                 'status'        => 'pending',
                 'note'          => $request->note,
-                'add_on_detail' => $request->add_on_detail, 
+                'add_on_detail' => $request->add_on_detail,
             ]);
 
             foreach ($orderItemsData as $data) {
@@ -99,7 +111,12 @@ class OrderController extends Controller
             $this->sendWhatsAppNotifications($order, $grandTotal);
 
             DB::commit();
-
+            
+            try {
+                $this->sendWhatsAppNotifications($order, $grandTotal);
+            } catch (\Exception $waError) {
+                \Illuminate\Support\Facades\Log::error("WA Gagal: " . $waError->getMessage());
+            }
             return redirect()->route('orders.index')->with('success', 'Booking berhasil dibuat! Menunggu konfirmasi admin.');
         } catch (\Exception $e) {
             DB::rollBack();

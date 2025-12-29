@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -16,7 +17,8 @@ class FabricController extends Controller
 {
 
 
-    public function homepage(){
+    public function homepage()
+    {
         $fabrics = Fabric::latest()->take(6)->get();
         $reviews = collect([
             (object)[
@@ -38,7 +40,7 @@ class FabricController extends Controller
 
         return view('welcome', compact('fabrics', 'reviews'));
     }
-    
+
     public function index(Request $request)
     {
         $query = Fabric::with(['category', 'supplier']);
@@ -52,10 +54,21 @@ class FabricController extends Controller
             $query->where('category_id', $request->category_id);
         }
 
-        $fabrics = $query->latest()->paginate(12);
-        $categories = Category::all();
+        $fabrics = $query->select(
+            'name',
+            'category_id',
+            'material'
+        )
+            ->selectRaw('MIN(id) as id') // Ambil ID pertama untuk link href
+            ->selectRaw('MIN(price_per_meter) as price_per_meter')
+            ->selectRaw('SUM(stock_meter) as total_stock') // Total stok semua warna
+            ->selectRaw('COUNT(id) as color_count') // Hitung jumlah warna
+            ->selectRaw('GROUP_CONCAT(color) as color_list')
+            ->groupBy('name', 'category_id', 'material')
+            ->paginate(12)
+            ->withQueryString();
 
-        
+        $categories = \App\Models\Category::all();
 
         return view('fabrics.index', compact('fabrics', 'categories'));
     }
@@ -68,7 +81,7 @@ class FabricController extends Controller
         return view('fabrics.create', compact('categories', 'suppliers'));
     }
 
-    
+
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -83,10 +96,10 @@ class FabricController extends Controller
         ]);
 
         $fabric = DB::transaction(function () use ($validated) {
-            
+
             $newFabric = Fabric::create($validated);
 
-            
+
             InventoryLog::create([
                 'fabric_id' => $newFabric->id,
                 'user_id' => Auth::id(),
@@ -103,8 +116,11 @@ class FabricController extends Controller
 
     public function show(Fabric $fabric)
     {
-        $fabric->load(['category', 'supplier']);
-        return view('fabrics.show', compact('fabric'));
+        $variants = Fabric::where('name', $fabric->name)
+            ->where('category_id', $fabric->category_id)
+            ->get();
+
+        return view('fabrics.show', compact('fabric', 'variants'));
     }
 
     public function edit(Fabric $fabric)
@@ -164,17 +180,17 @@ class FabricController extends Controller
             } else {
                 if ($type === 'restock') {
                     $logAmount = abs($input);
-
                 } else {
                     $logAmount = -1 * abs($input);
                 }
-            } 
+            }
 
             $newstock = $currentStock + $logAmount;
 
-            if ($newstock < 0){ 
+            if ($newstock < 0) {
                 throw ValidationException::withMessages([
-                    'change_amount' => 'Stok tidak mencukupi! Stok saat ini:' . $currentStock]);
+                    'change_amount' => 'Stok tidak mencukupi! Stok saat ini:' . $currentStock
+                ]);
             }
 
             $fabric->stock_meter = $newstock;

@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('fabric_id')->constrained('fabrics')->onDelete('cascade'); 
             
             $table->integer('quantity');
+            $table->string('colors');
             $table->decimal('price_per_meter', 10, 2);
             $table->decimal('subtotal', 10, 2);
 

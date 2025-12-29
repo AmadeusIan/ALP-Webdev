@@ -12,8 +12,9 @@ class VenueRoom extends Model
         'images' => 'array', // Ini kuncinya!
     ];
 
-    public function areas()
+
+    public function area()
     {
-        return $this->belongsTo(VenueArea::class);
+        return $this->belongsTo(VenueArea::class, 'venue_area_id');
     }
 }

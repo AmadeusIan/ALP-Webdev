@@ -46,7 +46,8 @@
                             <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Select
                                 Venue</label>
                             <select id="venueSelect"
-                                class="w-full rounded-lg border-gray-300 focus:border-black focus:ring-black transition font-bold text-gray-900">
+                                class="w-full rounded-lg border-gray-300 focus:border-black focus:ring-black transition font-bold text-gray-900"
+                                required>
                                 <option value="" selected disabled>-- Choose Hotel/Place --</option>
                                 @foreach ($venues as $venue)
                                     <option value="{{ $venue->id }}">{{ $venue->name }}</option>
@@ -125,6 +126,13 @@
         const venuesData = @json($venues);
         const fabricsData = @json($fabrics);
         const selectedVenueId = "{{ $selectedVenueId ?? '' }}";
+        const fabricsGrouped = {};
+        fabricsData.forEach(fabric => {
+            if (!fabricsGrouped[fabric.name]) {
+                fabricsGrouped[fabric.name] = [];
+            }
+            fabricsGrouped[fabric.name].push(fabric);
+        });
         const venueSelect = document.getElementById('venueSelect');
         const areaSection = document.getElementById('areaSection');
         const dynamicAreaList = document.getElementById('dynamicAreaList');
@@ -209,41 +217,72 @@
             roomDiv.appendChild(roomSelect);
 
             // B. Dropdown Fabric (Kain)
-            const fabricDiv = document.createElement('div');
-            fabricDiv.innerHTML =
+            const typeDiv = document.createElement('div');
+            typeDiv.innerHTML =
                 `<label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Select Fabric</label>`;
-            const fabricSelect = document.createElement('select');
-            fabricSelect.name = `items[${index}][fabric_id]`;
-            fabricSelect.className = "w-full text-sm rounded-md border-gray-300 focus:border-black focus:ring-black";
-            fabricSelect.disabled = true;
+            const typeSelect = document.createElement('select');
+            typeSelect.className = "w-full text-sm rounded-md border-gray-300 focus:border-black focus:ring-black";
+            typeSelect.disabled = true;
 
-            fabricsData.forEach(fabric => {
+            const defaultTypeOpt = document.createElement('option');
+            defaultTypeOpt.value = "";
+            defaultTypeOpt.innerText = "-- Select Type --";
+            typeSelect.appendChild(defaultTypeOpt);
+
+            Object.keys(fabricsGrouped).forEach(name => {
                 const opt = document.createElement('option');
-                opt.value = fabric.id;
-                // Format: Nama Kain - Warna (Sisa Stok)
-                opt.innerText = `${fabric.name} - ${fabric.color} (Stock: ${fabric.stock_meter}m)`;
-                fabricSelect.appendChild(opt);
+                opt.value = name;
+                opt.innerText = name; // Hanya menampilkan nama (misal: "Cotton Combed 30s")
+                typeSelect.appendChild(opt);
             });
-            fabricDiv.appendChild(fabricSelect);
+
+            typeDiv.appendChild(typeSelect);
 
             // C. Input Quantity
-            const qtyDiv = document.createElement('div');
-            qtyDiv.innerHTML =
-                `<label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Quantity (Meters)</label>`;
+            const colorDiv = document.createElement('div');
+            colorDiv.innerHTML =
+                `<label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Select Color</label>`;
+            const colorSelect = document.createElement('select');
+            colorSelect.name = `items[${index}][fabric_id]`;
+            colorSelect.className = "w-full text-sm rounded-md border-gray-300 focus:border-black focus:ring-black";
+            colorSelect.disabled = true;
+
+            const defaultColorOpt = document.createElement('option');
+            defaultColorOpt.value = "";
+            defaultColorOpt.innerText = "-- Select Type First --";
+            colorSelect.appendChild(defaultColorOpt);
+            colorDiv.appendChild(colorSelect);
+
             const qtyInput = document.createElement('input');
-            qtyInput.type = "number";
+            qtyInput.type = "hidden";
             qtyInput.name = `items[${index}][quantity]`;
             qtyInput.value = 1;
-            qtyInput.min = 1;
-            qtyInput.className = "w-full text-sm rounded-md border-gray-300 focus:border-black focus:ring-black";
             qtyInput.disabled = true;
-            qtyDiv.appendChild(qtyInput);
+
 
             // Gabungkan Input ke Content
             content.appendChild(roomDiv);
-            content.appendChild(fabricDiv);
-            content.appendChild(qtyDiv);
+            content.appendChild(typeDiv);
+            content.appendChild(colorDiv);
+            content.appendChild(qtyInput);
             wrapper.appendChild(content);
+
+            typeSelect.addEventListener('change', function() {
+                const selectedType = this.value;
+
+                // Reset dropdown warna
+                colorSelect.innerHTML = '<option value="">-- Select Color --</option>';
+
+                if (selectedType && fabricsGrouped[selectedType]) {
+                    // Loop data warna berdasarkan Tipe yang dipilih
+                    fabricsGrouped[selectedType].forEach(fabric => {
+                        const opt = document.createElement('option');
+                        opt.value = fabric.id; // Value = ID Kain Asli
+                        opt.innerText = `${fabric.color} (Stock: ${fabric.stock_meter})`;
+                        colorSelect.appendChild(opt);
+                    });
+                }
+            });
 
             // 4. Logika Toggle Checkbox
             checkbox.addEventListener('change', function() {
@@ -254,7 +293,8 @@
 
                     // Aktifkan Input agar terkirim ke server
                     roomSelect.disabled = false;
-                    fabricSelect.disabled = false;
+                    typeSelect.disabled = false;
+                    colorSelect.disabled = false;
                     qtyInput.disabled = false;
                 } else {
                     content.classList.add('hidden');
@@ -263,8 +303,12 @@
 
                     // Matikan Input agar TIDAK terkirim
                     roomSelect.disabled = true;
-                    fabricSelect.disabled = true;
+                    typeSelect.disabled = true;
+                    colorSelect.disabled = true;
                     qtyInput.disabled = true;
+
+                    typeSelect.value = "";
+                    colorSelect.innerHTML = '<option value="">-- Select Type First --</option>';
                 }
             });
 
