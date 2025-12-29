@@ -18,6 +18,9 @@ class OrderItem extends Model
     public function fabric() {
         return $this->belongsTo(Fabric::class);
     }
+    public function room(){
+        return $this->belongsTo(VenueRoom::class, 'venue_room_id');
+    }
     public function reviewItem(){
         return $this->hasOne(ReviewItem::class);
     }

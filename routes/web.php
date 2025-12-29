@@ -9,6 +9,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\InventoryLogController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\VenueController;
 use App\Http\Controllers\ReviewItemController;
 use App\Http\Controllers\ShopReviewController;
 
@@ -38,10 +39,12 @@ Route::middleware(['auth'])->group(function () {
     //order
 
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
-    Route::get('/fabrics/{fabric}/book', [OrderController::class, 'create'])->name('orders.create');
+    Route::get('/booking', [OrderController::class, 'create'])->name('orders.create');
     Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
     Route::get('/orders/{id}', [OrderController::class, 'show'])->name('orders.show');
 
+    Route::patch('/orders/{order}/update-price', [OrderController::class, 'updatePrice'])->name('orders.updatePrice');
+    Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
 
     //cart
 
@@ -64,6 +67,7 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('/notifications/read-all', [NotificationController::class, 'markAllasRead'])->name('notifications.markAllAsRead');
     Route::delete('/notifications/{id}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
 
+    Route::get('/venues', [VenueController::class, 'index'])->name('venues.index');
     //reviews
     // Submit review baru
    Route::post('/review-items', [ReviewItemController::class, 'store'])->name('review.store');
@@ -93,9 +97,6 @@ Route::middleware(['auth', 'is_admin'])->group(function () {
 
 
     Route::get('/inventory-logs', [InventoryLogController::class, 'index'])->name('inventory_logs.index');
-
-
-
 
     Route::patch('/orders/{order}/approve', [OrderController::class, 'approve'])->name('orders.approve');
     Route::patch('/orders/{order}/reject', [OrderController::class, 'reject'])->name('orders.reject');

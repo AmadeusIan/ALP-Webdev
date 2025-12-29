@@ -30,6 +30,10 @@
                     class="text-xs font-bold text-gray-500 hover:text-black transition uppercase tracking-widest">
                     Reviews
                 </a>
+                <a href="/venues"
+                    class="text-xs font-bold text-gray-500 hover:text-black transition uppercase tracking-widest">
+                    Venues
+                </a>
 
                 @if (Auth::User()?->role === 'admin')
                     <a href="/calendar/admin"
