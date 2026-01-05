@@ -11,6 +11,7 @@ use App\Models\Fabric;
 use App\Models\Supplier;
 use App\Models\Category;
 use App\Models\InventoryLog;
+use App\Models\ReviewShop;
 use Illuminate\Http\Request;
 
 class FabricController extends Controller
@@ -20,23 +21,13 @@ class FabricController extends Controller
     public function homepage()
     {
         $fabrics = Fabric::latest()->take(6)->get();
-        $reviews = collect([
-            (object)[
-                'user' => (object)['name' => 'Sarah Amalia'],
-                'rating' => 5,
-                'review' => 'Kualitas kain sangat bagus, dingin dan jatuh. Cocok untuk gaun pesta.'
-            ],
-            (object)[
-                'user' => (object)['name' => 'Budi Santoso'],
-                'rating' => 5,
-                'review' => 'Pelayanan sewa sangat cepat dan admin ramah. Recommended vendor!'
-            ],
-            (object)[
-                'user' => (object)['name' => 'Jessica Tan'],
-                'rating' => 4,
-                'review' => 'Pilihan warnanya lengkap banget. Suka sekali dengan koleksi sutranya.'
-            ],
-        ]);
+
+        // Show latest approved shop reviews on homepage
+        $reviews = ReviewShop::with('user')
+            ->where('status', 'approved')
+            ->latest()
+            ->take(6)
+            ->get();
 
         return view('welcome', compact('fabrics', 'reviews'));
     }
@@ -59,6 +50,7 @@ class FabricController extends Controller
             'material'
         )
             ->selectRaw('MIN(id) as id') // Ambil ID pertama untuk link href
+            ->selectRaw('MIN(image) as image')
             ->selectRaw('MIN(price_per_meter) as price_per_meter')
             ->selectRaw('SUM(stock_meter) as total_stock') // Total stok semua warna
             ->selectRaw('COUNT(id) as color_count') // Hitung jumlah warna
