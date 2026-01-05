@@ -12,6 +12,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\VenueController;
 use App\Http\Controllers\ReviewItemController;
 use App\Http\Controllers\ShopReviewController;
+use App\Http\Controllers\ReviewItemController as AdminReviewItemController;
 
 Route::get('/', [FabricController::class, 'homepage'])->name('welcome.homepage');
 
@@ -29,11 +30,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/calendar', [CalendarController::class, 'myCalendar'])->name('calendar.my');
     // Route::get('/calendar/events', [CalendarController::class, 'myEvents'])->name('calendar.events.my');
 
-    // Route GET → tampilkan form
-    Route::get('/meeting-request', [MeetingController::class, 'create'])->name('meeting-request.create');
-
-    // Route POST → proses form submit
-    Route::post('/meeting-request', [MeetingController::class, 'store'])->name('meeting-request.store');
+    // Meeting request (user) removed
 
 
     //order
@@ -113,9 +110,22 @@ Route::middleware(['auth', 'is_admin'])->group(function () {
 
 
 
-    Route::get('/meetings', [MeetingController::class, 'adminIndex'])->name('admin.meetings.index');
-    Route::post('/meetings/{meeting}/approve', [MeetingController::class, 'accept'])->name('admin.meetings.approve');
-    Route::post('/meetings/{meeting}/reject', [MeetingController::class, 'reject'])->name('admin.meetings.reject');
+    // Admin meeting request page removed (unused)
+
+    // Product reviews moderation
+    Route::get('/admin/product-reviews', [ReviewItemController::class, 'adminIndex'])->name('admin.productReviews.index');
+    Route::post('/admin/product-reviews/{review}/approve', [ReviewItemController::class, 'approve'])->name('admin.productReviews.approve');
+    Route::post('/admin/product-reviews/{review}/reject', [ReviewItemController::class, 'reject'])->name('admin.productReviews.reject');
+
+    // Shop reviews moderation
+    Route::get('/admin/shop-reviews', [ShopReviewController::class, 'adminIndex'])->name('admin.shopReviews.index');
+    Route::post('/admin/shop-reviews/{review}/approve', [ShopReviewController::class, 'approve'])->name('admin.shopReviews.approve');
+    Route::post('/admin/shop-reviews/{review}/reject', [ShopReviewController::class, 'reject'])->name('admin.shopReviews.reject');
+
+    // Shop reviews moderation
+    Route::get('/admin/shop-reviews', [ShopReviewController::class, 'adminIndex'])->name('admin.shopReviews.index');
+    Route::post('/admin/shop-reviews/{review}/approve', [ShopReviewController::class, 'approve'])->name('admin.shopReviews.approve');
+    Route::post('/admin/shop-reviews/{review}/reject', [ShopReviewController::class, 'reject'])->name('admin.shopReviews.reject');
 });
 
 Route::get('/fabrics/{fabric}', [FabricController::class, 'show'])->name('fabrics.show');

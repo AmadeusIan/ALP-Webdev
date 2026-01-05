@@ -9,11 +9,11 @@ use App\Models\Fabric;
 use App\Models\Notification;
 use App\Models\User;
 use App\Models\Venue;
+use App\Models\ReviewShop;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
-use PHPUnit\Framework\TestStatus\Notice;
 
 class OrderController extends Controller
 {
@@ -108,8 +108,6 @@ class OrderController extends Controller
                 'is_read' => false,
             ]);
 
-            $this->sendWhatsAppNotifications($order, $grandTotal);
-
             DB::commit();
             
             try {
@@ -159,31 +157,29 @@ class OrderController extends Controller
 
             $orders = Order::with(['user', 'items.fabric', 'items.room'])->latest()->paginate(10);
         } else {
-            $orders = Order::with(['items.fabric', 'items.room'])->where('user_id', $user->id)->latest()->paginate(10);
+            $orders = Order::with(['items.fabric', 'items.room', 'items.reviewItem'])
+                ->where('user_id', $user->id)
+                ->latest()
+                ->paginate(10);
+
+            // User can review if they haven't submitted a shop review yet
+            $hasUserReview = ReviewShop::where('user_id', $user->id)->exists();
+            $canReview = !$hasUserReview;
+
+            return view('orders.index', compact('orders', 'canReview'));
         }
 
         return view('orders.index', compact('orders'));
     }
 
-    public function show($id)
-{
-    $order = Order::where('id', $id)
-        ->where('user_id', Auth::id())
-        ->with([
-            'items.fabric',
-            'items.reviewItem'
-        ])
-        ->firstOrFail();
-
-    return view('orders.show', compact('order'));
-}
-
-
-
     public function show(Order $order)
     {
+        $user = Auth::user();
+        if ($user && $user->role !== 'admin' && $order->user_id !== $user->id) {
+            abort(403);
+        }
 
-        $order->load(['user', 'items.fabric']);
+        $order->load(['user', 'items.fabric', 'items.reviewItem']);
         return view('orders.show', compact('order'));
     }
 
@@ -212,12 +208,13 @@ class OrderController extends Controller
                     'subtotal' => $newSubTotal
                 ]);
 
-                $newGrandTotal = +$newSubTotal;
+                $newGrandTotal += $newSubTotal;
             }
-            $order->update(['total_price' => $newGrandTotal]);
-
-            return redirect()->back()->with('success', 'Order prices updated successfully.');
         }
+
+        $order->update(['total_price' => $newGrandTotal]);
+
+        return redirect()->back()->with('success', 'Order prices updated successfully.');
     }
 
 

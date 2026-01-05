@@ -16,10 +16,6 @@
                         class="text-xs font-bold text-gray-500 hover:text-black transition uppercase tracking-widest">
                         Calendar
                     </a>
-                    <a href="/meeting-request"
-                        class="text-xs font-bold text-gray-500 hover:text-black transition uppercase tracking-widest">
-                        Add Meeting
-                    </a>
                 @endif
                 
                 <a href="{{ route('fabrics.index') }}"
@@ -40,9 +36,9 @@
                         class="text-xs font-bold text-gray-500 hover:text-black transition uppercase tracking-widest">
                         Calendar
                     </a>
-                    <a href="/inventory-logs"
+                    <a href="/admin/product-reviews"
                         class="text-xs font-bold text-gray-500 hover:text-black transition uppercase tracking-widest">
-                        Inventory
+                        Product Reviews
                     </a>
 
                     <a href="/orders"
@@ -50,10 +46,12 @@
                         Orders
                     </a>
 
-                    <a href="/meetings"
+                    <a href="/admin/shop-reviews"
                         class="text-xs font-bold text-gray-500 hover:text-black transition uppercase tracking-widest">
-                        Meeting Requests
+                        Shop Reviews
                     </a>
+
+                    
                 @endif
             </div>
 

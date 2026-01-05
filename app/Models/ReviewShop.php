@@ -13,6 +13,7 @@ class ReviewShop extends Model
         'user_id',
         'rating',
         'comment',
+        'status',
     ];
 
     // Relasi ke user

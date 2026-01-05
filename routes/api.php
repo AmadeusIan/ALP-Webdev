@@ -6,7 +6,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\FabricController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\Api\CalendarApiController;
-use App\Models\MeetingRequest;
+// use App\Models\MeetingRequest;
 
 
 // ==========================================
@@ -43,28 +43,7 @@ Route::get('events-approved', [CalendarController::class, 'apiAllEvents']);
 
 
 
-Route::get('/events/{userId}', function($userId){
-    $meetings = MeetingRequest::where('user_id', $userId)->get();
-
-    return $meetings->map(function($m){
-        $color = match($m->status) {
-            'approved' => '#10b981', // hijau
-            'pending'  => '#f59e0b', // kuning
-            'rejected' => '#ef4444', // merah
-            default    => '#6b7280',
-        };
-
-        return [
-            'id' => $m->id,
-            'title' => $m->title,
-            'start' => $m->start,
-            'end' => $m->end,
-            'backgroundColor' => $color,
-            'borderColor' => $color,
-            'textColor' => '#ffffff'
-        ];
-    });
-});
+// Deprecated older meetings endpoint replaced by Orders-based calendar API
 
 
 

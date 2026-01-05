@@ -73,7 +73,7 @@
                                     </td>
 
                                     <td class="py-6 px-6 align-top">
-                                        <a href="{{ route('orders.show', $order) }}" class="block group-hover:opacity-80 transition">
+                                        <div class="block group-hover:opacity-80 transition">
                                             <ul class="space-y-3">
                                                 @foreach ($order->items as $item)
                                                     <li class="flex items-start gap-3">
@@ -82,18 +82,42 @@
                                                                 <img src="{{ asset($item->fabric->image) }}" class="w-full h-full object-cover">
                                                             @endif
                                                         </div>
-                                                        <div>
+                                                        <div class="flex-1">
                                                             <span class="block font-serif text-sm text-gray-900 leading-none mb-1">
                                                                 {{ $item->fabric->name }}
                                                             </span>
                                                             <span class="block font-sans text-[10px] font-bold text-gray-400 uppercase tracking-wider">
                                                                 {{ $item->quantity }} Meters
                                                             </span>
+
+                                                            @if (Auth::user()->role === 'user' && $order->status === 'approved')
+                                                                @if (empty($item->reviewItem))
+                                                                    <form action="{{ route('review.store') }}" method="POST" class="mt-2 flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                                                                        @csrf
+                                                                        <input type="hidden" name="order_item_id" value="{{ $item->id }}">
+                                                                        <label class="text-[10px] font-bold uppercase tracking-wider text-gray-500">Rate</label>
+                                                                        <select name="rating" required class="border border-stone-300 rounded px-2 py-1 text-xs focus:ring-black focus:border-black">
+                                                                            <option value="">-</option>
+                                                                            @for($r=1;$r<=5;$r++)
+                                                                                <option value="{{ $r }}">{{ $r }} ⭐</option>
+                                                                            @endfor
+                                                                        </select>
+                                                                        <input name="comment" placeholder="Optional comment" class="border border-stone-300 rounded px-2 py-1 text-xs w-full sm:w-56" />
+                                                                        <button type="submit" class="inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest border border-black text-black hover:bg-black hover:text-white transition">
+                                                                            Submit
+                                                                        </button>
+                                                                    </form>
+                                                                @else
+                                                                    <div class="mt-2 inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-green-700 bg-green-50 border border-green-100 px-2 py-1">
+                                                                        Reviewed: ⭐ {{ $item->reviewItem->rating }}/5
+                                                                    </div>
+                                                                @endif
+                                                            @endif
                                                         </div>
                                                     </li>
                                                 @endforeach
                                             </ul>
-                                        </a>
+                                        </div>
                                     </td>
 
                                     <td class="py-6 px-6 align-top">
@@ -152,6 +176,15 @@
                                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                                                     </button>
                                                 </form>
+                                            @endif
+
+                                            @if (Auth::user()->role === 'user' && $order->status === 'approved' && ($canReview ?? false))
+                                                <a href="{{ route('shop.reviews') }}"
+                                                   class="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-bold uppercase tracking-widest border border-black text-black hover:bg-black hover:text-white transition"
+                                                   title="Review Shop">
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 11l-4 4m0 0l4 4m-4-4h14"></path></svg>
+                                                    Review Shop
+                                                </a>
                                             @endif
 
                                         </div>

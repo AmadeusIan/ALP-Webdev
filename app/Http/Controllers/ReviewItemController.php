@@ -39,6 +39,7 @@ class ReviewItemController extends Controller
         'order_item_id' => $item->id,
         'rating' => $request->rating,
         'comment' => $request->comment,
+        'status' => 'pending',
     ]);
 
     return back()->with('success', 'Review berhasil dikirim');
@@ -68,13 +69,42 @@ class ReviewItemController extends Controller
     // GET ALL REVIEWS FOR A PRODUCT
     public function reviewsForProduct($fabricId)
     {
-        $reviews = ReviewItem::whereHas('orderItem', function ($q) use ($fabricId) {
-            $q->where('fabric_id', $fabricId);
-        })
-        ->with('orderItem.order.user')
-        ->latest()
-        ->get();
+        $reviews = ReviewItem::where('status', 'approved')
+            ->whereHas('orderItem', function ($q) use ($fabricId) {
+                $q->where('fabric_id', $fabricId);
+            })
+            ->with('orderItem.order.user')
+            ->latest()
+            ->get();
 
         return response()->json($reviews);
+    }
+
+    // ADMIN: List and moderate product reviews
+    public function adminIndex()
+    {
+        $pending = ReviewItem::with('orderItem.order.user')
+            ->where('status', 'pending')
+            ->latest()
+            ->get();
+
+        $approved = ReviewItem::with('orderItem.order.user')
+            ->where('status', 'approved')
+            ->latest()
+            ->get();
+
+        return view('admin.product_reviews', compact('pending', 'approved'));
+    }
+
+    public function approve(ReviewItem $review)
+    {
+        $review->update(['status' => 'approved']);
+        return back()->with('success', 'Product review approved.');
+    }
+
+    public function reject(ReviewItem $review)
+    {
+        $review->update(['status' => 'rejected']);
+        return back()->with('success', 'Product review rejected.');
     }
 }

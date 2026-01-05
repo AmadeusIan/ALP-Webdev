@@ -122,27 +122,28 @@ class FabricController extends Controller
 
     public function show(Fabric $fabric)
     {
-        $variants = Fabric::where('name', $fabric->name)
-            ->where('category_id', $fabric->category_id)
-            ->get();
-
-        return view('fabrics.show', compact('fabric', 'variants'));
-    public function show(Fabric $fabric){
         $fabric->load([
             'category',
             'supplier',
             'orderItems.reviewItem'
         ]);
 
+        $variants = Fabric::where('name', $fabric->name)
+            ->where('category_id', $fabric->category_id)
+            ->get();
+
         $reviews = $fabric->orderItems
             ->pluck('reviewItem')
-            ->filter();
+            ->filter(function ($review) {
+                return $review && $review->status === 'approved';
+            });
 
         $averageRating = round($reviews->avg('rating'), 1);
         $totalReviews = $reviews->count();
 
         return view('fabrics.show', compact(
             'fabric',
+            'variants',
             'reviews',
             'averageRating',
             'totalReviews'

@@ -13,15 +13,18 @@ class ShopReviewController extends Controller
     {
         $user = Auth::user();
 
-        // Ambil semua review shop terbaru
-        $reviews = ReviewShop::with('user')->latest()->get();
+        // Ambil semua review shop yang sudah di-approve
+        $reviews = ReviewShop::with('user')
+            ->where('status', 'approved')
+            ->latest()
+            ->get();
 
         // Cek apakah user sudah beli produk sebelumnya
         $hasPurchased = Order::where('user_id', $user->id)
             ->where('status', 'approved')
             ->exists();
 
-        // Cek apakah user sudah review toko
+        // Cek apakah user sudah review toko (status apapun)
         $userReview = ReviewShop::where('user_id', $user->id)->first();
 
         // Hitung rata-rata rating
@@ -54,13 +57,43 @@ class ShopReviewController extends Controller
             return back()->with('error', 'You have already reviewed the shop.');
         }
 
-        // Simpan review
+        // Simpan review sebagai pending (menunggu persetujuan admin)
         ReviewShop::create([
             'user_id' => $user->id,
             'rating' => $request->rating,
             'comment' => $request->comment,
+            'status' => 'pending',
         ]);
 
-        return back()->with('success', 'Thank you for reviewing the shop!');
+        return back()->with('success', 'Your review has been submitted and is awaiting admin approval.');
+    }
+
+    // ADMIN: List and moderate reviews
+    public function adminIndex()
+    {
+        // Pending first, then approved, newest first
+        $pending = ReviewShop::with('user')
+            ->where('status', 'pending')
+            ->latest()
+            ->get();
+
+        $approved = ReviewShop::with('user')
+            ->where('status', 'approved')
+            ->latest()
+            ->get();
+
+        return view('admin.shop_reviews', compact('pending', 'approved'));
+    }
+
+    public function approve(ReviewShop $review)
+    {
+        $review->update(['status' => 'approved']);
+        return back()->with('success', 'Review approved.');
+    }
+
+    public function reject(ReviewShop $review)
+    {
+        $review->update(['status' => 'rejected']);
+        return back()->with('success', 'Review rejected.');
     }
 }

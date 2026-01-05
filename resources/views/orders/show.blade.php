@@ -6,6 +6,39 @@
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                 <div>
                     <div class="flex items-center gap-3">
+                                                                @if ($order->status === 'approved' && empty($item->reviewItem) && Auth::user()->role === 'user')
+                                                                    <div class="mt-4 bg-white border border-gray-200 rounded-lg p-4">
+                                                                        <h5 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Review this product</h5>
+                                                                        <form action="{{ route('review.store') }}" method="POST" class="space-y-2">
+                                                                            @csrf
+                                                                            <input type="hidden" name="order_item_id" value="{{ $item->id }}">
+                                                                            <div class="flex items-center gap-3">
+                                                                                <label class="text-xs text-gray-600">Rating</label>
+                                                                                <select name="rating" required class="border border-gray-300 rounded px-2 py-1 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                                                                    <option value="">Select</option>
+                                                                                    @for($r=1;$r<=5;$r++)
+                                                                                        <option value="{{ $r }}">{{ $r }} ⭐</option>
+                                                                                    @endfor
+                                                                                </select>
+                                                                            </div>
+                                                                            <div>
+                                                                                <textarea name="comment" rows="2" placeholder="Optional comment" class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+                                                                            </div>
+                                                                            <button type="submit" class="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-bold uppercase tracking-widest bg-gray-900 text-white rounded hover:bg-gray-800 transition">
+                                                                                Submit Review
+                                                                            </button>
+                                                                        </form>
+                                                                    </div>
+                                                                @elseif(!empty($item->reviewItem))
+                                                                    <div class="mt-4 bg-gray-50 border border-gray-200 rounded-lg p-3">
+                                                                        <p class="text-xs text-gray-500 uppercase font-bold tracking-wider">Your Review</p>
+                                                                        <p class="text-sm text-gray-800 font-semibold">⭐ {{ $item->reviewItem->rating }}/5</p>
+                                                                        @if($item->reviewItem->comment)
+                                                                            <p class="text-sm text-gray-600 italic">"{{ $item->reviewItem->comment }}"</p>
+                                                                        @endif
+                                                                        <p class="text-xs text-gray-400">{{ $item->reviewItem->created_at->format('d M Y') }}</p>
+                                                                    </div>
+                                                                @endif
                         <a href="{{ route('orders.index') }}" class="text-gray-400 hover:text-gray-600 transition">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
