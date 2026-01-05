@@ -22,10 +22,12 @@
                     class="text-xs font-bold text-gray-500 hover:text-black transition uppercase tracking-widest">
                     Collections
                 </a>
-                <a href="{{ route ('shop.reviews')}}"
-                    class="text-xs font-bold text-gray-500 hover:text-black transition uppercase tracking-widest">
-                    Reviews
-                </a>
+                @if (Auth::User()?->role !== 'admin')
+                    <a href="{{ route ('shop.reviews')}}"
+                        class="text-xs font-bold text-gray-500 hover:text-black transition uppercase tracking-widest">
+                        Reviews
+                    </a>
+                @endif
                 <a href="/venues"
                     class="text-xs font-bold text-gray-500 hover:text-black transition uppercase tracking-widest">
                     Venues
@@ -69,15 +71,6 @@
                         <span
                             class="absolute top-1 right-1 block h-2.5 w-2.5 rounded-full bg-red-600 ring-2 ring-white animate-pulse"></span>
                     @endif
-                </a>
-
-                <a href="{{ route('cart.index') }}"
-                    class="text-xs font-bold text-gray-900 hover:text-gray-600 uppercase tracking-wider flex items-center gap-1">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
-                    </svg>
-                    Cart
                 </a>
 
                 <a href="{{ route('dashboard') }}"
@@ -143,9 +136,35 @@
             <x-responsive-nav-link :href="route('fabrics.index')">
                 {{ __('Collections') }}
             </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('cart.index')">
-                {{ __('Cart') }}
-            </x-responsive-nav-link>
+            @if (Auth::user()?->role === 'user')
+                <x-responsive-nav-link href="/calendar">
+                    {{ __('Calendar') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('shop.reviews')">
+                    {{ __('Reviews') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('notifications.index')">
+                    {{ __('Notifications') }}
+                </x-responsive-nav-link>
+            @endif
+
+            @if (Auth::user()?->role === 'admin')
+                <x-responsive-nav-link href="/calendar/admin">
+                    {{ __('Calendar (Admin)') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link href="/orders">
+                    {{ __('Orders') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link href="/inventory-logs">
+                    {{ __('Inventory') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link href="/admin/product-reviews">
+                    {{ __('Product Reviews') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link href="/admin/shop-reviews">
+                    {{ __('Shop Reviews') }}
+                </x-responsive-nav-link>
+            @endif
         </div>
 
         <div class="pt-4 pb-1 border-t border-gray-200">

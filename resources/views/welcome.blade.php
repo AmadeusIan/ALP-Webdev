@@ -14,7 +14,7 @@
 
 <body class="antialiased font-sans text-gray-800 bg-white selection:bg-black selection:text-white">
 
-    <nav class="fixed w-full z-50 bg-white/95 backdrop-blur-md border-b border-gray-100 transition-all duration-300">
+    <nav x-data="{ open: false }" class="fixed w-full z-50 bg-white/95 backdrop-blur-md border-b border-gray-100 transition-all duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-20">
                 <div class="flex-shrink-0 flex items-center gap-2">
@@ -29,66 +29,22 @@
                         Story</a>
                     <a href="/fabrics"
                         class="text-xs font-bold text-gray-500 hover:text-black transition uppercase tracking-widest">Collections</a>
-                    <a href="/reviews"
+                    <a href="{{ route('shop.reviews') }}"
                         class="text-xs font-bold text-gray-500 hover:text-black transition uppercase tracking-widest">Reviews</a>
-                    <a href="/venues"
+                    <a href="{{ route('venues.index') }}"
                         class="text-xs font-bold text-gray-500 hover:text-black transition uppercase tracking-widest">Venues</a>
                 </div>
 
                 <div class="hidden md:flex items-center space-x-6">
                     @if (Route::has('login'))
                         @auth
-                            <a href="{{ route('cart.index') }}"
-                                class="group flex items-center gap-1 text-xs font-bold text-gray-900 hover:text-gray-600 uppercase tracking-wider">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
-                                </svg>
-                                <span class="group-hover:underline decoration-1 underline-offset-4">Cart</span>
-                            </a>
-
-                            <div class="h-4 w-px bg-gray-300"></div>
-
-                            <div x-data="{ open: false }" class="relative">
-                                <button @click="open = !open" @click.outside="open = false"
-                                    class="flex items-center gap-1 text-xs font-bold text-gray-900 hover:text-gray-600 uppercase tracking-wider focus:outline-none">
-                                    <span>{{ Auth::user()->name }}</span>
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M19 9l-7 7-7-7"></path>
-                                    </svg>
-                                </button>
-
-                                <div x-show="open" x-transition:enter="transition ease-out duration-100"
-                                    x-transition:enter-start="transform opacity-0 scale-95"
-                                    x-transition:enter-end="transform opacity-100 scale-100"
-                                    x-transition:leave="transition ease-in duration-75"
-                                    x-transition:leave-start="transform opacity-100 scale-100"
-                                    x-transition:leave-end="transform opacity-0 scale-95"
-                                    class="absolute right-0 mt-4 w-48 bg-white border border-gray-100 shadow-xl py-2 z-50"
-                                    style="display: none;">
-
-                                    <a href="{{ url('/dashboard') }}"
-                                        class="block px-4 py-2 text-xs font-bold text-gray-700 uppercase tracking-wider hover:bg-gray-50 hover:text-black transition">
-                                        Dashboard
-                                    </a>
-                                    <a href="{{ route('profile.edit') }}"
-                                        class="block px-4 py-2 text-xs font-bold text-gray-700 uppercase tracking-wider hover:bg-gray-50 hover:text-black transition">
-                                        Profile Settings
-                                    </a>
-
-                                    <div class="border-t border-gray-100 my-1"></div>
-
-                                    <form method="POST" action="{{ route('logout') }}">
-                                        @csrf
-                                        <a href="{{ route('logout') }}"
-                                            onclick="event.preventDefault(); this.closest('form').submit();"
-                                            class="block px-4 py-2 text-xs font-bold text-gray-700 uppercase tracking-wider hover:bg-gray-50 hover:text-black transition">
-                                            Log Out
-                                        </a>
-                                    </form>
-                                </div>
-                            </div>
+                            <span class="text-xs font-bold text-gray-700 uppercase tracking-wider">Hi, {{ Auth::user()->name }}</span>
+                            <a href="{{ url('/dashboard') }}" class="text-xs font-bold text-gray-900 hover:text-gray-600 uppercase tracking-wider">Dashboard</a>
+                            <a href="{{ route('profile.edit') }}" class="text-xs font-bold text-gray-900 hover:text-gray-600 uppercase tracking-wider">Profile</a>
+                            <form method="POST" action="{{ route('logout') }}" class="inline">
+                                @csrf
+                                <button type="submit" class="text-xs font-bold text-gray-900 hover:text-gray-600 uppercase tracking-wider">Log Out</button>
+                            </form>
                         @else
                             <a href="{{ route('login') }}"
                                 class="text-xs font-bold text-gray-900 hover:text-gray-600 uppercase tracking-wider">Log
@@ -100,6 +56,32 @@
                         @endauth
                     @endif
                 </div>
+
+                <!-- Mobile hamburger -->
+                <button @click="open = !open" class="sm:hidden inline-flex items-center justify-center p-2 rounded-md text-gray-600 hover:text-black hover:bg-gray-100 focus:outline-none">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path :class="{ 'hidden': open, 'inline-flex': !open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        <path :class="{ 'hidden': !open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile menu -->
+        <div x-show="open" x-transition class="sm:hidden bg-white border-t border-gray-100">
+            <div class="px-4 py-3 space-y-2">
+                <a href="#about" class="block text-sm font-bold text-gray-700 uppercase tracking-wider">Our Story</a>
+                <a href="/fabrics" class="block text-sm font-bold text-gray-700 uppercase tracking-wider">Collections</a>
+                <a href="{{ route('shop.reviews') }}" class="block text-sm font-bold text-gray-700 uppercase tracking-wider">Reviews</a>
+                <a href="{{ route('venues.index') }}" class="block text-sm font-bold text-gray-700 uppercase tracking-wider">Venues</a>
+                @if (Route::has('login'))
+                    @auth
+                        <a href="{{ url('/dashboard') }}" class="block text-sm font-bold text-gray-700 uppercase tracking-wider">Dashboard</a>
+                    @else
+                        <a href="{{ route('login') }}" class="block text-sm font-bold text-gray-700 uppercase tracking-wider">Log in</a>
+                        <a href="{{ route('register') }}" class="block text-sm font-bold text-gray-700 uppercase tracking-wider">Join Us</a>
+                    @endauth
+                @endif
             </div>
         </div>
     </nav>
@@ -144,9 +126,9 @@
                 @forelse($fabrics as $fabric)
                     <div class="group relative cursor-pointer">
                         <div class="aspect-w-3 aspect-h-4 w-full overflow-hidden bg-gray-100">
-                            <img src="storage/{{ $fabric->image }}"
+                            <img src="{{ $fabric->getImageUrl() }}"
                                 alt="{{ $fabric->name }}"
-                                class="h-[500px] w-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out">
+                                class="h-64 md:h-80 lg:h-[500px] w-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out">
 
                             <div
                                 class="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
@@ -231,7 +213,7 @@
                     @if ($index < 3)
                         <div class="text-center px-4">
                             <div class="mb-6 flex justify-center text-yellow-500">
-                                @for ($i = 0; $i < 5; $i++)
+                                @for ($i = 0; $i < ($review->rating ?? 0); $i++)
                                     <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20">
                                         <path
                                             d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
@@ -239,7 +221,7 @@
                                 @endfor
                             </div>
                             <blockquote class="text-xl font-serif italic text-gray-800 mb-6 leading-relaxed">
-                                "{{ $review->review }}"
+                                "{{ $review->comment }}"
                             </blockquote>
                             <div class="font-bold text-xs uppercase tracking-widest text-gray-500">
                                 — {{ $review->user->name ?? 'Happy Client' }}
@@ -255,26 +237,7 @@
         </div>
     </section>
 
-    <section class="py-32 bg-white" id="portfolio">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="text-4xl font-bold text-center mb-16">Our Fabric Collection</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            @forelse($fabrics as $fabric)
-                <div class="group cursor-pointer">
-                    <div class="overflow-hidden rounded-lg mb-4">
-                        <img src="{{ $fabric->getImageUrl() }}" 
-                             alt="{{ $fabric->name }}"
-                             class="h-80 w-full object-cover group-hover:scale-105 transition-transform duration-500">
-                    </div>
-                    <h3 class="text-xl font-semibold">{{ $fabric->name }}</h3>
-                    <p class="text-gray-600">{{ $fabric->color }} • {{ $fabric->material }}</p>
-                </div>
-            @empty
-                <p class="text-gray-500">No fabrics available</p>
-            @endforelse
-        </div>
-    </div>
-</section>
+    
 
     <section class="py-32 bg-gray-50" id="location">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

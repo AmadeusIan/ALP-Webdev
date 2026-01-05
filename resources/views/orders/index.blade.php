@@ -4,9 +4,9 @@
         <link href="https://fonts.bunny.net/css?family=cinzel:400,700|lato:400,700" rel="stylesheet" />
     @endpush
 
-    <div class="min-h-screen bg-stone-50 pb-20">
+    <div class="min-h-screen bg-stone-50 pb-16">
         
-        <div class="bg-black text-white pt-32 pb-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+        <div class="bg-black text-white pt-24 md:pt-32 pb-16 md:pb-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
             <div class="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
             
             <div class="max-w-7xl mx-auto relative z-10">
@@ -48,12 +48,12 @@
 
             <div class="bg-white shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-stone-100">
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
+                    <table class="w-full text-left border-collapse text-xs sm:text-sm">
                         <thead class="bg-stone-50 border-b border-stone-200">
                             <tr>
                                 <th class="py-5 px-6 font-sans text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em]">Order Ref</th>
                                 <th class="py-5 px-6 font-sans text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em]">Items Collection</th>
-                                <th class="py-5 px-6 font-sans text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em]">Duration</th>
+                                <th class="py-5 px-6 font-sans text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em] hidden sm:table-cell">Duration</th>
                                 <th class="py-5 px-6 font-sans text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em]">Total Bill</th>
                                 <th class="py-5 px-6 font-sans text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em]">Status</th>
                                 <th class="py-5 px-6 font-sans text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em] text-right">Actions</th>
@@ -63,7 +63,7 @@
                             @forelse($orders as $order)
                                 <tr class="group hover:bg-stone-50/50 transition duration-300">
                                     
-                                    <td class="py-6 px-6 align-top">
+                                    <td class="py-5 px-4 sm:px-6 align-top">
                                         <a href="{{ route('orders.show', $order) }}" class="font-serif text-lg font-bold text-gray-900 hover:text-indigo-600 transition underline decoration-stone-200 underline-offset-4">
                                             #{{ $order->order_number ?? str_pad($order->id, 4, '0', STR_PAD_LEFT) }}
                                         </a>
@@ -72,7 +72,7 @@
                                         </div>
                                     </td>
 
-                                    <td class="py-6 px-6 align-top">
+                                    <td class="py-5 px-4 sm:px-6 align-top">
                                         <div class="block group-hover:opacity-80 transition">
                                             <ul class="space-y-3">
                                                 @foreach ($order->items as $item)
@@ -120,7 +120,7 @@
                                         </div>
                                     </td>
 
-                                    <td class="py-6 px-6 align-top">
+                                    <td class="py-5 px-4 sm:px-6 align-top hidden sm:table-cell">
                                         <div class="flex flex-col">
                                             <span class="font-sans text-xs font-bold text-gray-900 uppercase tracking-wider mb-1">
                                                 {{ \Carbon\Carbon::parse($order->start_date)->format('M d') }} 
@@ -133,7 +133,7 @@
                                         </div>
                                     </td>
 
-                                    <td class="py-6 px-6 align-top">
+                                    <td class="py-5 px-4 sm:px-6 align-top">
                                         <span class="font-serif text-base font-bold text-gray-900">
                                             Rp {{ number_format($order->total_price, 0, ',', '.') }}
                                         </span>
@@ -154,7 +154,7 @@
                                         </span>
                                     </td>
 
-                                    <td class="py-6 px-6 align-top text-right">
+                                    <td class="py-5 px-4 sm:px-6 align-top text-right">
                                         <div class="flex justify-end gap-2">
                                             
                                             <a href="{{ route('orders.show', $order) }}" 
@@ -180,7 +180,7 @@
 
                                             @if (Auth::user()->role === 'user' && $order->status === 'approved' && ($canReview ?? false))
                                                 <a href="{{ route('shop.reviews') }}"
-                                                   class="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-bold uppercase tracking-widest border border-black text-black hover:bg-black hover:text-white transition"
+                                                   class="inline-flex items-center gap-2 px-2.5 py-1.5 text-[10px] sm:text-xs font-bold uppercase tracking-widest border border-black text-black hover:bg-black hover:text-white transition"
                                                    title="Review Shop">
                                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 11l-4 4m0 0l4 4m-4-4h14"></path></svg>
                                                     Review Shop

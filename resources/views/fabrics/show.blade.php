@@ -19,15 +19,9 @@
                 <div class="flex flex-col md:flex-row border-b border-gray-100">
                     
                     {{-- LEFT COLUMN: IMAGE --}}
-                    <div class="w-full md:w-2/5 bg-gray-100 flex items-center justify-center p-8 relative overflow-hidden group min-h-[400px]">
-                        <div class="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition duration-500">
-                        </div>
-                        {{-- Placeholder Icon --}}
-                        <svg class="w-24 h-24 text-gray-300 drop-shadow-sm transition-transform duration-500 group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
-                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
-                            </path>
-                        </svg>
+                    <div class="w-full md:w-2/5 bg-gray-100 flex items-center justify-center p-0 relative overflow-hidden group min-h-[400px]">
+                        <img src="{{ $fabric->getImageUrl() }}" alt="{{ $fabric->name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                        <div class="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition duration-500"></div>
                     </div>
 
                     {{-- RIGHT COLUMN: SPECS & ACTIONS --}}
